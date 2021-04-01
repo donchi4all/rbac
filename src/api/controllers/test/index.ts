@@ -10,6 +10,7 @@ import {
 
 import httpStatuses from '../../httpStatuses';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
+import Test from '../../services/test';
 
 @Route('test')
 export class TestController extends Controller {
@@ -37,6 +38,10 @@ export class TestController extends Controller {
   ): Promise<unknown> {
     try {
       this.setStatus(httpStatuses.created.code);
+
+      // TEMPORARY
+      const test = new Test();
+      test.addTestValueToGrantTable();
 
       this.log.info(`Route /test POST with data: ${requestBody}`);
       return { body: requestBody };
