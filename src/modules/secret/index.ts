@@ -68,14 +68,12 @@ class Secret {
   public get Db (): DbEnvInterface {
     try {
       return {
-        driver: this.getOsEnv('DB_CONNECTION'),
+        dialect: this.getOsEnv('DB_CONNECTION') as 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql',
+        database: this.getOsEnv('DB_DATABASE'),
+        username: this.getOsEnv('DB_USERNAME'),
+        password: this.getOsEnv('DB_PASSWORD'),
         host: this.getOsEnv('DB_HOST'),
         port: this.toNumber(this.getOsEnv('DB_PORT')),
-        database: this.getOsEnv('DB_DATABASE'),
-        user: this.getOsEnv('DB_USERNAME'),
-        password: this.getOsEnv('DB_PASSWORD'),
-        multipleStatements: this.toBool(this.getOsEnv('DB_MULTI_STATEMENT')),
-        dateStrings: this.toBool(this.getOsEnv('DB_DATE_STRINGS')),
       };
     } catch (err) {
       this.log.error(`Database env error: ${err.message}`);
