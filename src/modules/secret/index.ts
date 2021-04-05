@@ -41,9 +41,7 @@ class Secret {
    * @param path - Path to a file or directory
    */
   public getPath (path: string): string {
-    return (['production', 'prod'].some((env) => env === this.getOsEnv('APP_ENVIRONMENT')))
-      ? join(process.cwd(), path.replace('src/', 'dist/').slice(0, -3) + '.js')
-      : join(process.cwd(), path);
+    return join(process.cwd(), path);
   }
 
   /**
