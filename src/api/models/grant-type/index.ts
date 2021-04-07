@@ -1,11 +1,12 @@
 import { Table, AutoIncrement, PrimaryKey, Default, Column, Model, AllowNull, DataType } from 'sequelize-typescript';
 import { GrantTypeInterface, GrantTypeCreationType } from './IGrantType';
 
-@Table
+@Table({
+  tableName: 'grantType',
+})
 export class GrantType extends Model<GrantTypeInterface, GrantTypeCreationType> {
   @PrimaryKey
   @AutoIncrement
-  @Default(0)
   @Column(DataType.INTEGER)
   id: number
 
