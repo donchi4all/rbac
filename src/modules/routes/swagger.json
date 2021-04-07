@@ -20,9 +20,9 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/test": {
+		"/rbac": {
 			"get": {
-				"operationId": "GetTest",
+				"operationId": "GetRolePrivileges",
 				"responses": {
 					"200": {
 						"description": "SUCCESS",
@@ -37,7 +37,7 @@
 				"parameters": [
 					{
 						"in": "query",
-						"name": "id",
+						"name": "roleId",
 						"required": true,
 						"schema": {
 							"format": "double",
@@ -45,15 +45,27 @@
 						}
 					}
 				]
-			},
+			}
+		},
+		"/rbac/migration": {
 			"post": {
-				"operationId": "CreateTest",
+				"operationId": "CreateMigration",
 				"responses": {
-					"201": {
-						"description": "CREATED",
+					"200": {
+						"description": "SUCCESS",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"properties": {
+										"msg": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"msg"
+									],
+									"type": "object"
+								}
 							}
 						}
 					}
@@ -64,10 +76,47 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {}
+							"schema": {
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								],
+								"type": "object"
+							}
 						}
 					}
 				}
+			}
+		},
+		"/rbac/insert": {
+			"post": {
+				"operationId": "InsertDataToTables",
+				"responses": {
+					"201": {
+						"description": "CREATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
 			}
 		}
 	},
