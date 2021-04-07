@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize-typescript';
+import { Repository, Sequelize, Model } from 'sequelize-typescript';
 import { SequelizeTypescriptMigration } from 'sequelize-typescript-migration';
 
 import * as Models from '../../api/models';
@@ -16,22 +16,33 @@ export class Database {
       ...Secret.Db,
       pool: { max: 1 },
       models: Object.values(Models),
+      // logging: this.log.info,
     });
     this.log.info('Sequelize ORM with mariaDb has been created successfully.');
   }
 
-  public async makeMigration(migrationName: string): Promise<{ msg: string }> {
+  public async makeMigration(
+    migrationName: string,
+    models: Array<Repository<Model<unknown, unknown>>> = []
+  ): Promise<{ msg: string }> {
     try {
-      console.log('SEQUALIZE: ', this.sequelize.connectionManager);
-      const test = await SequelizeTypescriptMigration.makeMigration(this.sequelize, {
-        outDir: Secret.getPath('migrations'),
+      let customSequalize = null;
+      if (models.length) {
+        customSequalize = new Sequelize({
+          ...Secret.Db,
+          pool: { max: 1 },
+          models,
+          // logging: this.log.info,
+        });
+      }
+      const migration = await SequelizeTypescriptMigration.makeMigration(customSequalize || this.sequelize, {
+        outDir: Secret.getPath('migrations/compiled'),
         migrationName,
       });
-      console.log('TEST: ', test);
-      return test;
+      return migration;
     } catch (err) {
-      console.log('TEST_ERROR: ', err);
-      return Promise.reject(err);
+      this.log.error(`Sequelize Migration Error "${migrationName}": ${err}`);
+      throw err;
     }
   }
 
