@@ -1,11 +1,12 @@
 import { Table, AutoIncrement, PrimaryKey, Default, Column, Model, AllowNull, CreatedAt, UpdatedAt, DataType } from 'sequelize-typescript';
 import { PermissionInterface, PermissionCreationType } from './IPermission';
 
-@Table
+@Table({
+  tableName: 'permission',
+})
 export class Permission extends Model<PermissionInterface, PermissionCreationType> {
   @PrimaryKey
   @AutoIncrement
-  @Default(0)
   @Column(DataType.INTEGER)
   id: number;
 
@@ -16,10 +17,6 @@ export class Permission extends Model<PermissionInterface, PermissionCreationTyp
   @Default('')
   @Column(DataType.STRING(255))
   description: string;
-
-  @AllowNull(false)
-  @Column(DataType.STRING(48))
-  slug: string;
 
   @Default(true)
   @AllowNull(false)
