@@ -4,7 +4,6 @@ export interface RoleInterface {
   id?: number;
   title: string;
   description?: string;
-  slug: string;
   active: boolean;
   createdAt?: Date,
   updatedAt?: Date;
