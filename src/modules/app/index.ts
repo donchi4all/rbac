@@ -18,6 +18,10 @@ class App {
   public loadDatabase (): void {
     Database.init();
   }
+
+  public makeDatabaseMigration (): void {
+    Database.makeMigration('test_migration_123'); // TEMPORARY
+  }
 }
 
 export default new App;

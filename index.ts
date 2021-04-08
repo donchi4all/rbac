@@ -7,3 +7,5 @@ App.loadEnvironment();
 App.loadDatabase();
 
 App.loadServer();
+
+// App.makeDatabaseMigration(); // TEMPORARY
