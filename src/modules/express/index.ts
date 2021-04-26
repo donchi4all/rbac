@@ -23,7 +23,7 @@ class Express {
   }
 
   private mountStatics (): void {
-    this.express.use('/public', express.static(config.publicDir));
+    this.express.use('/public', express.static(config.dirs.public));
   }
 
   private mountBodyParser (): void {
@@ -40,7 +40,7 @@ class Express {
   }
 
   private mountRoutes (): void {
-    this.express.use(config.swaggerRoute, swaggerUi.serve, async (req: express.Request, res: express.Response) => {
+    this.express.use(config.swagger.route, swaggerUi.serve, async (req: express.Request, res: express.Response) => {
       return res.send(
         swaggerUi.generateHTML(SwaggerJson)
       );
@@ -72,7 +72,7 @@ class Express {
     }
   }
 
-  public get Server(): express.Application {
+  public get Server (): express.Application {
     return this.express;
   }
 }
