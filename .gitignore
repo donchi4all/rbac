@@ -1,6 +1,6 @@
 # Node artifact files
-node_modules/
-dist/
+/node_modules/
+/dist/
 
 # Build
 pids
@@ -18,7 +18,6 @@ coverage
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/
