@@ -8,4 +8,4 @@ App.loadDatabase();
 
 App.loadServer();
 
-// App.makeDatabaseMigration(); // TEMPORARY
+App.loadAccessControl();

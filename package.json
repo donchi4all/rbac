@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "nodemon index.ts",
+    "start": "npm run postinstall && nodemon index.ts",
     "build": "npm run build-routes && tsc && npm run lint",
     "build-routes": "tsoa spec-and-routes",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cp -R node_modules_patches/ node_modules/",
+    "test": "jest --forceExit --coverage --verbose",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix"
   },
   "repository": {
