@@ -3,40 +3,54 @@ import ac from 'accesscontrol';
 import * as Models from '../../api/models';
 import { LoggerDecorator, LoggerInterface } from '../logger';
 
-export default class AccessControl {
+class AccessControl {
   @LoggerDecorator('AccessControl')
   private log: LoggerInterface;
   private accessControl: ac.AccessControl;
 
-  constructor () {
+  public async init (): Promise<void> {
     try {
-      const grantList = [
-        { role: 'admin', resource: 'transaction', action: 'create:any', attributes: '*' },
-        { role: 'admin', resource: 'transaction', action: 'read:any', attributes: '*' },
-        { role: 'admin', resource: 'transaction', action: 'update:any', attributes: '*' },
-        { role: 'admin', resource: 'transaction', action: 'delete:any', attributes: '*' },
-        // { role: 'admin', resource: 'transaction', action: 'execute:any', attributes: '*' },
-        // { role: 'admin', resource: 'transaction', action: 'approve:any', attributes: '*' },
-      ];
-      this.accessControl = new ac.AccessControl(grantList);
-      this.log.info('Access Control has been initialized with grant list successfully');
+      const rolesPrivileges = await Models.RolePrivilege.findAll({
+        include: [
+          {
+            model: Models.Role,
+            attributes: ['title'],
+            where: { active: true },
+          },
+          {
+            model: Models.Grant,
+            attributes: ['title'],
+            where: { active: true },
+          },
+          {
+            model: Models.GrantType,
+            attributes: ['name'],
+          },
+          {
+            model: Models.Permission,
+            attributes: ['title'],
+            where: { active: true },
+          },
+        ],
+      });
+      const grantsList = rolesPrivileges.map(record => ({
+        role: record.fkIdRole.title,
+        resource: record.fkIdPermission.title,
+        action: `${record.fkIdGrant.title}:${record.fkIdGrantType.name}`,
+        attributes: '*',
+      }));
+      
+      this.accessControl = new ac.AccessControl(grantsList);
+      this.log.info('Access Control has been initialized with grants list successfully.');
     } catch (err) {
       this.log.error(`There is an error with Access Control initialization: ${err}`);
       throw err;
     }
   }
 
-  public async permission (roleId: number): Promise<unknown> {
-    try {
-    const rolePrivilege = await Models.RolePrivilege.findOne({
-      where: { idRole: roleId },
-      include: [ Models.Grant, Models.GrantType, Models.Permission, Models.Role ],
-    });
-    // return this.accessControl.can(rolePrivilege);
-    return rolePrivilege;
-    } catch (err) {
-      this.log.error(`There is an error with getting permission for role ID ${roleId}: ${err}`);
-      throw err;
-    }
+  public checkAccess (role: string): ac.Query {
+    return this.accessControl.can(role);
   }
 }
+
+export default new AccessControl;
