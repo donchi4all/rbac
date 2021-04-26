@@ -4,7 +4,7 @@ import express from 'express';
 import { ErrorInterface } from '../../modules/exceptions/IError';
 
 class Errors {
-  public errorMiddleware(
+  public errorMiddleware (
     err: ErrorInterface,
     req: express.Request,
     res: express.Response,

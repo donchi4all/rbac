@@ -1,6 +1,5 @@
 import * as Models from '../../models';
 import Database from '../../../modules/database';
-import AccessControl from '../../../modules/access-control';
 
 // TEMPORARY class realisation
 export default class Test {
@@ -10,15 +9,11 @@ export default class Test {
       const gRead = new Models.Grant({ title: 'read', active: true });
       const gUpdate = new Models.Grant({ title: 'update', active: true });
       const gDelete = new Models.Grant({ title: 'delete', active: true });
-      const gExecute = new Models.Grant({ title: 'execute', active: true });
-      const gApprove = new Models.Grant({ title: 'approve', active: true });
       
       await gCreate.save();
       await gRead.save();
       await gUpdate.save();
       await gDelete.save();
-      await gExecute.save();
-      await gApprove.save();
     } catch (err) {
       throw err;
     }
@@ -150,15 +145,6 @@ export default class Test {
   public createNewMigration (name: string): Promise<{ msg: string }> {
     try {
       return Database.makeMigration(name);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  public getRoles (roleId: number): Promise<unknown> {
-    try {
-      const test = new AccessControl();
-      return test.permission(roleId);
     } catch (err) {
       throw err;
     }
