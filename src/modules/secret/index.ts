@@ -3,7 +3,7 @@ import fs from 'fs';
 import { join } from 'path';
 
 import { AppEnvInterface } from './IAppEnv';
-import { DbEnvInterface } from './IDbEnv';
+import { DbEnvInterface, DatabaseDialectType } from './IDbEnv';
 import { LoggerDecorator, LoggerInterface } from '../logger';
 
 class Secret {
@@ -66,7 +66,7 @@ class Secret {
   public get Db (): DbEnvInterface {
     try {
       return {
-        dialect: this.getOsEnv('DB_CONNECTION') as 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql',
+        dialect: this.getOsEnv('DB_CONNECTION') as DatabaseDialectType,
         database: this.getOsEnv('DB_DATABASE'),
         username: this.getOsEnv('DB_USERNAME'),
         password: this.getOsEnv('DB_PASSWORD'),
