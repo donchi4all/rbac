@@ -5,7 +5,7 @@ export interface GrantInterface {
   title: string;
   description?: string;
   active: boolean;
-  createdAt?: Date,
+  createdAt?: Date;
   updatedAt?: Date;
 }
 

@@ -11,6 +11,7 @@ import {
 import httpStatuses from '../../httpStatuses';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 import Test from '../../services/test';
+import rbacService from '../../services/rbac';
 
 @Route('rbac')
 export class TestController extends Controller {
@@ -19,17 +20,12 @@ export class TestController extends Controller {
 
   @Get()
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async getRolePrivileges(
+  public async getRolePrivileges (
     @Query() roleId: number
   ): Promise<unknown> {
     try {
       this.log.info(`Route /rbac GET role privileges with user ID: ${roleId}`);
-
-      // TEMPORARY
-      const test = new Test();
-      const q = await test.getRoles(roleId);
-
-      return q;
+      return await rbacService.getPermissionsByRoleId(roleId);
     } catch (err) {
       this.log.error(`Route /rbac GET with err: ${err}`);
       throw err;
@@ -38,7 +34,7 @@ export class TestController extends Controller {
 
   @Post('/migration')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async createMigration(
+  public async createMigration (
     @Body() requestBody: { name: string }
   ): Promise<{ msg: string }> {
     try {
@@ -54,7 +50,7 @@ export class TestController extends Controller {
 
   @Post('/insert')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
-  public async insertDataToTables(): Promise<{ success: string }> {
+  public async insertDataToTables (): Promise<{ success: string }> {
     try {
       this.setStatus(httpStatuses.created.code);
 

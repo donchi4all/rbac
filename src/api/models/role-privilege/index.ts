@@ -1,4 +1,4 @@
-import { Table, AutoIncrement, PrimaryKey, Default, Column, AllowNull, CreatedAt, UpdatedAt, DataType, Model, BelongsTo } from 'sequelize-typescript';
+import { Table, AutoIncrement, PrimaryKey, Column, AllowNull, Default, CreatedAt, UpdatedAt, DataType, Model, BelongsTo } from 'sequelize-typescript';
 import { RolePrivilegeInterface, RolePrivilegeCreationType } from './IRolePrivilege';
 import * as Models from '../index';
 
@@ -6,6 +6,7 @@ import * as Models from '../index';
   tableName: 'rolePrivilege',
 })
 export class RolePrivilege extends Model<RolePrivilegeInterface, RolePrivilegeCreationType> {
+  [x: string]: any;
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
@@ -56,10 +57,16 @@ export class RolePrivilege extends Model<RolePrivilegeInterface, RolePrivilegeCr
   idGrantType: number;
 
   @CreatedAt
-  @Column(DataType.DATE)
+  @Column({
+    type: DataType.DATE,
+    defaultValue: DataType.NOW,
+  })
   createdAt!: Date;
 
   @UpdatedAt
-  @Column(DataType.DATE)
+  @Column({
+    type: DataType.DATE,
+    defaultValue: DataType.NOW,
+  })
   updatedAt!: Date;
 }
