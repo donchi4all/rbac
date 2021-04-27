@@ -2,7 +2,7 @@
 
 'use strict';
 
-var Sequelize = require('sequelize');
+const Sequelize = require('sequelize');
 
 /**
  * Actions summary:
@@ -15,14 +15,14 @@ var Sequelize = require('sequelize');
  *
  **/
 
-var info = {
+const info = {
   'revision': 1,
   'name': 'initTables',
   'created': '2021-04-09T13:23:13.011Z',
   'comment': ''
 };
 
-var migrationCommands = [
+const migrationCommands = [
   /**
    * CREATE
    * GRANT TABLE
@@ -231,7 +231,8 @@ var migrationCommands = [
   }
 ];
 
-var rollbackCommands = [{
+const rollbackCommands = [
+  {
     fn: 'dropTable',
     params: ['rolePrivilege']
   },
@@ -263,12 +264,12 @@ module.exports = {
    */
   up: function(queryInterface, Sequelize)
   {
-    var index = this.pos;
+    let index = this.pos;
     return new Promise(function(resolve, reject) {
       function next() {
         if (index < migrationCommands.length)
         {
-          let command = migrationCommands[index];
+          const command = migrationCommands[index];
           console.log('[#' + index + '] execute: ' + command.fn);
           index++;
           queryInterface[command.fn].apply(queryInterface, command.params).then(next, reject);
@@ -286,12 +287,12 @@ module.exports = {
    */
   down: function(queryInterface, Sequelize)
   {
-    var index = this.pos;
+    let index = this.pos;
     return new Promise(function(resolve, reject) {
       function next() {
         if (index < rollbackCommands.length)
         {
-          let command = rollbackCommands[index];
+          const command = rollbackCommands[index];
           console.log('[#' + index + '] execute: ' + command.fn);
           index++;
           queryInterface[command.fn].apply(queryInterface, command.params).then(next, reject);
