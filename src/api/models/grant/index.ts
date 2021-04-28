@@ -1,4 +1,4 @@
-import { Table, AutoIncrement, Default, PrimaryKey, Column, Model, DataType, AllowNull, CreatedAt, UpdatedAt } from 'sequelize-typescript';
+import { Table, AutoIncrement, PrimaryKey, Column, Model, DataType, AllowNull, CreatedAt, UpdatedAt } from 'sequelize-typescript';
 import { GrantInterface, GrantCreationType } from './IGrant';
 
 @Table({
@@ -14,20 +14,27 @@ export class Grant extends Model<GrantInterface, GrantCreationType> {
   @Column(DataType.STRING(255))
   title: string;
 
-  @Default('')
-  @Column(DataType.STRING(255))
+  @Column({
+    type: DataType.STRING(255),
+    defaultValue: '',
+  })
   description: string;
 
-  @Default(true)
   @AllowNull(false)
   @Column(DataType.BOOLEAN)
   active: boolean;
 
   @CreatedAt
-  @Column(DataType.DATE)
+  @Column({
+    type: DataType.DATE,
+    defaultValue: DataType.NOW,
+  })
   createdAt!: Date;
 
   @UpdatedAt
-  @Column(DataType.DATE)
+  @Column({
+    type: DataType.DATE,
+    defaultValue: DataType.NOW,
+  })
   updatedAt!: Date;
 }

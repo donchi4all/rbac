@@ -1,6 +1,11 @@
 export default {
-  apiDir: 'api',
-  publicDir: 'public',
+  dirs: {
+    api: 'api',
+    public: 'public',
+    migrations: 'migrations/compiled',
+  },
 
-  swaggerRoute: '/docs',
+  swagger: {
+    route: '/docs',
+  },
 };

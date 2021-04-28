@@ -17,3 +17,5 @@ export interface DbEnvInterface {
   host: string,
   port: number,
 }
+
+export type DatabaseDialectType = 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql';

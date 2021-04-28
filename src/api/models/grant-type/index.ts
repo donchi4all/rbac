@@ -3,6 +3,8 @@ import { GrantTypeInterface, GrantTypeCreationType } from './IGrantType';
 
 @Table({
   tableName: 'grantType',
+  createdAt: false,
+  updatedAt: false,
 })
 export class GrantType extends Model<GrantTypeInterface, GrantTypeCreationType> {
   @PrimaryKey

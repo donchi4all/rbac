@@ -1,6 +1,7 @@
 import Secret from '../secret';
 import Express from '../express';
 import Database from '../database';
+import AccessControl from '../access-control';
 
 class App {
   public clearConsole (): void {
@@ -19,8 +20,8 @@ class App {
     Database.init();
   }
 
-  public makeDatabaseMigration (): void {
-    Database.makeMigration('test_migration_123'); // TEMPORARY
+  public loadAccessControl (): void {
+    AccessControl.init();
   }
 }
 
