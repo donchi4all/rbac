@@ -6,12 +6,6 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"ReturnType_typeofAccessControl.checkAccess_": {
-				"description": "Obtain the return type of a function type"
-			},
-			"RolePrivilegeType": {
-				"$ref": "#/components/schemas/ReturnType_typeofAccessControl.checkAccess_"
-			},
 			"Pick_RoleInterface.title-or-description-or-active_": {
 				"properties": {
 					"title": {
@@ -246,9 +240,7 @@
 						"description": "SUCCESS",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/RolePrivilegeType"
-								}
+								"schema": {}
 							}
 						}
 					}

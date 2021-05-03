@@ -11,16 +11,6 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "ReturnType_typeofAccessControl.checkAccess_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"any","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "RolePrivilegeType": {
-        "dataType": "refAlias",
-        "type": {"ref":"ReturnType_typeofAccessControl.checkAccess_","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pick_RoleInterface.title-or-description-or-active_": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"title":{"dataType":"string","required":true},"description":{"dataType":"string"},"active":{"dataType":"boolean","required":true}},"validators":{}},
