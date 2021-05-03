@@ -1,13 +1,12 @@
-import { Optional } from 'sequelize';
-
 export interface RolePrivilegeInterface {
-  id?: number;
+  id: number;
   idRole: number;
   idPermission: number;
   idGrant: number;
   idGrantType: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export type RolePrivilegeCreationType = Optional<RolePrivilegeInterface, 'id' | 'createdAt' | 'updatedAt'>;
+export type RolePrivilegeCreationType =
+  Pick<RolePrivilegeInterface, 'idRole' | 'idPermission' | 'idGrant' | 'idGrantType'>;
