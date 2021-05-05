@@ -1,19 +1,20 @@
-import { Table, AutoIncrement, PrimaryKey, Default, Column, Model, AllowNull, DataType } from 'sequelize-typescript';
-import { GrantTypeInterface, GrantTypeCreationType } from './IGrantType';
+import { Table, AutoIncrement, PrimaryKey, Column, Model, DataType } from 'sequelize-typescript';
+import { GrantTypeInterface } from './IGrantType';
 
 @Table({
   tableName: 'grantType',
   createdAt: false,
   updatedAt: false,
 })
-export class GrantType extends Model<GrantTypeInterface, GrantTypeCreationType> {
+export class GrantType extends Model<GrantTypeInterface> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
   id: number
 
-  @AllowNull(false)
-  @Default('own')
-  @Column(DataType.STRING(48))
+  @Column({
+    type: DataType.STRING(48),
+    defaultValue: 'own',
+  })
   name: 'any' | 'own'
 }

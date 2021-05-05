@@ -1,10 +1,10 @@
 import { Table, AutoIncrement, PrimaryKey, Column, Model, DataType, AllowNull, CreatedAt, UpdatedAt } from 'sequelize-typescript';
-import { GrantInterface, GrantCreationType } from './IGrant';
+import { GrantInterface } from './IGrant';
 
 @Table({
   tableName: 'grant',
 })
-export class Grant extends Model<GrantInterface, GrantCreationType> {
+export class Grant extends Model<GrantInterface> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

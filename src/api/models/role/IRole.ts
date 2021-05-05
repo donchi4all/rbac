@@ -1,12 +1,10 @@
-import { Optional } from 'sequelize';
-
 export interface RoleInterface {
-  id?: number;
+  id: number;
   title: string;
   description?: string;
   active: boolean;
-  createdAt?: Date,
-  updatedAt?: Date;
+  createdAt: Date,
+  updatedAt: Date;
 }
 
-export type RoleCreationType = Optional<RoleInterface, 'id' | 'description' | 'createdAt' | 'updatedAt'>;
+export type RoleCreationType = Pick<RoleInterface, 'title' | 'description' | 'active'>;

@@ -5,7 +5,219 @@
 		"parameters": {},
 		"requestBodies": {},
 		"responses": {},
-		"schemas": {},
+		"schemas": {
+			"Pick_RoleInterface.title-or-description-or-active_": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"title",
+					"active"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"RoleCreationType": {
+				"$ref": "#/components/schemas/Pick_RoleInterface.title-or-description-or-active_"
+			},
+			"Pick_GrantInterface.title_": {
+				"properties": {
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"title"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Pick_GrantTypeInterface.name_": {
+				"properties": {
+					"name": {
+						"type": "string",
+						"enum": [
+							"any",
+							"own"
+						]
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Pick_PermissionInterface.title-or-description-or-active_": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"title",
+					"active"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"PermissionCreationType": {
+				"$ref": "#/components/schemas/Pick_PermissionInterface.title-or-description-or-active_"
+			},
+			"PermissionsAndGrantsSetParams": {
+				"items": {
+					"properties": {
+						"permission": {
+							"$ref": "#/components/schemas/PermissionCreationType"
+						},
+						"grantType": {
+							"$ref": "#/components/schemas/Pick_GrantTypeInterface.name_"
+						},
+						"grant": {
+							"$ref": "#/components/schemas/Pick_GrantInterface.title_"
+						}
+					},
+					"required": [
+						"permission",
+						"grantType",
+						"grant"
+					],
+					"type": "object"
+				},
+				"type": "array"
+			},
+			"PermissionsAndGrantsCreationParams": {
+				"properties": {
+					"privileges": {
+						"$ref": "#/components/schemas/PermissionsAndGrantsSetParams"
+					},
+					"role": {
+						"$ref": "#/components/schemas/RoleCreationType"
+					}
+				},
+				"required": [
+					"privileges",
+					"role"
+				],
+				"type": "object"
+			},
+			"RoleInterface": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"active",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GrantInterface": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"active",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PermissionInterface": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"active",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
 		"securitySchemes": {}
 	},
 	"info": {
@@ -22,7 +234,7 @@
 	"paths": {
 		"/rbac": {
 			"get": {
-				"operationId": "GetRolePrivileges",
+				"operationId": "ReadRolePrivileges",
 				"responses": {
 					"200": {
 						"description": "SUCCESS",
@@ -45,26 +257,17 @@
 						}
 					}
 				]
-			}
-		},
-		"/rbac/migration": {
+			},
 			"post": {
-				"operationId": "CreateMigration",
+				"operationId": "AddRoleAndPrivileges",
 				"responses": {
-					"200": {
-						"description": "SUCCESS",
+					"201": {
+						"description": "CREATED",
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"msg": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"msg"
-									],
-									"type": "object"
+									"type": "number",
+									"format": "double"
 								}
 							}
 						}
@@ -77,39 +280,108 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"name": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"name"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/PermissionsAndGrantsCreationParams"
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "UpdateRolePrivileges",
+				"responses": {
+					"200": {
+						"description": "SUCCESS",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PermissionsAndGrantsSetParams"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/rbac/insert": {
-			"post": {
-				"operationId": "InsertDataToTables",
+		"/rbac/role": {
+			"get": {
+				"operationId": "GetRoles",
 				"responses": {
-					"201": {
-						"description": "CREATED",
+					"200": {
+						"description": "SUCCESS",
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"success": {
-											"type": "string"
-										}
+									"items": {
+										"$ref": "#/components/schemas/RoleInterface"
 									},
-									"required": [
-										"success"
-									],
-									"type": "object"
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/rbac/grant": {
+			"get": {
+				"operationId": "GetGrants",
+				"responses": {
+					"200": {
+						"description": "SUCCESS",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/GrantInterface"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/rbac/permission": {
+			"get": {
+				"operationId": "GetPermissions",
+				"responses": {
+					"200": {
+						"description": "SUCCESS",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PermissionInterface"
+									},
+									"type": "array"
 								}
 							}
 						}

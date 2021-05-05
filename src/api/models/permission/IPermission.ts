@@ -1,12 +1,10 @@
-import { Optional } from 'sequelize';
-
 export interface PermissionInterface {
-  id?: number;
+  id: number;
   title: string;
   description?: string;
   active: boolean;
-  createdAt?: Date,
-  updatedAt?: Date;
+  createdAt: Date,
+  updatedAt: Date;
 }
 
-export type PermissionCreationType = Optional<PermissionInterface, 'id' | 'description' | 'createdAt' | 'updatedAt'>;
+export type PermissionCreationType = Pick<PermissionInterface, 'title' | 'description' | 'active'>;
