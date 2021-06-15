@@ -6,6 +6,6 @@ export default {
   },
 
   swagger: {
-    route: '/docs',
+    route: '/rbac/docs',
   },
 };
