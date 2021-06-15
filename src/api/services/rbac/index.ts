@@ -6,26 +6,29 @@ import { GrantTypeInterface } from '../../models/grant-type/IGrantType';
 import { PermissionInterface, PermissionCreationType } from '../../models/permission/IPermission';
 
 import AccessControl from '../../../modules/access-control';
-
-export type PermissionsAndGrantsSetParams = Array<{
-  grant: Pick<GrantInterface, 'title'>,
-  grantType: Pick<GrantTypeInterface, 'name'>,
-  permission: PermissionCreationType,
-}>;
-
-export type PermissionsAndGrantsCreationParams = {
-  role: RoleCreationType;
-  privileges: PermissionsAndGrantsSetParams;
-}
-
-export type RolePrivilegeType = Promise<ReturnType<typeof AccessControl.checkAccess>>;
-
-export { RoleInterface, GrantInterface, PermissionInterface };
+import { RolePrivilegeErrorHandler } from '../../../modules/exceptions';
 
 type ModelNameType = 'Grant' | 'GrantType' | 'Permission' | 'Role';
 type ModelType = Models.Grant | Models.GrantType | Models.Permission | Models.Role;
+type PermissionAndGrantParam = {
+  grant: Pick<GrantInterface, 'title'>,
+  grantType: Pick<GrantTypeInterface, 'name'>,
+  permission: PermissionCreationType,
+};
+
+export type PermissionsAndGrantsSetParams = Array<PermissionAndGrantParam>;
+export type PermissionsAndGrantsCreationParams = {
+  role: RoleCreationType;
+  privileges: PermissionsAndGrantsSetParams;
+};
+export type RolePrivilegeType = Promise<ReturnType<typeof AccessControl.checkAccess>>;
+export { RoleInterface, GrantInterface, PermissionInterface };
 
 class RbacService {
+  //#region Private Methods
+  /**
+   * NOT IMPLEMENTED
+   */
   private async findModelByProperty (
     modelName: ModelNameType,
     property: { key: string, value: string }
@@ -41,65 +44,108 @@ class RbacService {
       const modelObject = await models[modelName];
 
       if (!modelObject) {
-        throw new Error(`The ${modelName.toLowerCase()} with ${property.key}=${property.value} has not been found.`);
+        throw new RolePrivilegeErrorHandler({
+          status: 500,
+          code: 'FATAL',
+          message: `The ${modelName.toLowerCase()} with ${property.key}=${property.value} has not been found.`,
+        });
       }
 
       return modelObject;
+    } catch (err) {
+      console.log('QWE_123');
+      throw err;
+    }
+  }
+
+  private async getRoleByIdAndCheck (id: number): Promise<Models.Role> {
+    try {
+      const role = await Models.Role.findByPk(id);
+
+      if (!role) {
+        throw new RolePrivilegeErrorHandler(RolePrivilegeErrorHandler.RoleDoesNotExist);
+      }
+      if (!role.active) {
+        throw new RolePrivilegeErrorHandler(RolePrivilegeErrorHandler.InactiveRole);
+      }
+
+      return role;
     } catch (err) {
       throw err;
     }
   }
 
-  private async setPrivilegesToRoleId (roleId: number, privileges: PermissionsAndGrantsSetParams): Promise<void> {
+  /**
+   * NOT IMPLEMENTED
+   */
+  private async getExistingAndNewPermissions (privileges: PermissionsAndGrantsSetParams):
+    Promise<{ existingPermissions: Array<Models.Permission>, newPermissions: Array<string> }> {
     try {
-      const uniquePermissions = privileges
-        .map((privilege) => privilege.permission.title)
-        .filter((permission, index, self) => self.indexOf(permission) === index);
+      const uniquePermissions = Array.from(new Set(
+        privileges.map((privilege) => privilege.permission.title)
+      ));
+
       const existingPermissions = await Models.Permission.findAll({
         where: {
           title: uniquePermissions,
         }
       });
+
       const newPermissions = uniquePermissions
         .filter(permission => !existingPermissions.find((x) => x.title === permission));
 
-      privileges.forEach(async (privilege) => {
-        try {
-          let permission: Models.Permission;
-          if (newPermissions.includes(privilege.permission.title)) {
-            permission = new Models.Permission(privilege.permission);
-            await permission.save();
-          } else {
-            permission = existingPermissions.find((x) => x.title === privilege.permission.title);
-          }
-
-          const grant = await this.findModelByProperty(
-            'Grant',
-            { key: 'title', value: privilege.grant.title });
-          const grantType = await this.findModelByProperty(
-            'GrantType',
-            { key: 'name', value: privilege.grantType.name });
-
-          const rolePrivilege = new Models.RolePrivilege({
-            idGrant: grant.id,
-            idGrantType: grantType.id,
-            idRole: roleId,
-            idPermission: permission.id,
-          });
-          await rolePrivilege.save();
-        } catch (err) {
-          throw err;
-        }
-      });
+      return {
+        existingPermissions,
+        newPermissions,
+      };
     } catch (err) {
       throw err;
     }
   }
 
+  private async setPrivilegesToRoleId (roleId: number, privileges: PermissionsAndGrantsSetParams):
+    Promise<void> {
+    try {
+      await Promise.all(privileges.map(async (privilege) => {
+        try {
+          const grant = await Models.Grant.findOne({ where: { title: privilege.grant.title }});
+          if (!grant) {
+            throw new RolePrivilegeErrorHandler(RolePrivilegeErrorHandler.GrantDoesNotExist);
+          }
+          const grantType = await Models.GrantType.findOne({ where: { name: privilege.grantType.name }});
+          const [permission, created] = await Models.Permission.findOrCreate({
+            where: { title: privilege.permission.title },
+            defaults: {
+              title: privilege.permission.title,
+              active: privilege.permission.active,
+            },
+          });
+          !created && await permission.update(privilege.permission);
+
+          return Models.RolePrivilege.findOrCreate({
+            where: {
+              idGrant: grant.id,
+              idGrantType: grantType.id,
+              idRole: roleId,
+              idPermission: permission.id,
+            }
+          });
+        } catch (err) {
+          console.log(err);
+          throw err;
+        }
+      }));
+    } catch (err) {
+      throw err;
+    }
+  }
+  //#endregion
+
+  //#region Public Methods
   public async getRoles (): Promise<Array<RoleInterface>> {
     try {
       const modelRoles = await Models.Role.findAll();
-      return modelRoles.map((role) => role.get());
+      return modelRoles as Array<RoleInterface>;
     } catch (err) {
       throw err;
     }
@@ -108,7 +154,7 @@ class RbacService {
   public async getGrants (): Promise<Array<GrantInterface>> {
     try {
       const modelGrants = await Models.Grant.findAll();
-      return modelGrants.map((grant) => grant.get());
+      return modelGrants as Array<GrantInterface>;
     } catch (err) {
       throw err;
     }
@@ -117,39 +163,24 @@ class RbacService {
   public async getPermissions (): Promise<Array<PermissionInterface>> {
     try {
       const modelPermissions = await Models.Permission.findAll();
-      return modelPermissions.map((permission) => permission.get());
+      return modelPermissions as Array<PermissionInterface>;
     } catch (err) {
       throw err;
     }
   }
 
-  public async getPermissionsByRoleId (id: number): RolePrivilegeType {
+  public async getPermissionsByRoleId_OLD (id: number): RolePrivilegeType {
     try {
-      const role = await Models.Role.findByPk(id);
-
-      if (!role) {
-        throw new Error(`The role with id=${id} does not exist.`);
-      }
-      if (!role.active) {
-        throw new Error(`The role "${role.title}" with id=${role.id} is inactive.`);
-      }
-
+      const role = await this.getRoleByIdAndCheck(id);
       return AccessControl.checkAccess(role.title);
     } catch (err) {
       throw err;
     }
   }
 
-  public async getPermissionsByRoleIdNew (id: number): Promise<unknown> {
+  public async getPermissionsByRoleId (id: number): Promise<unknown> {
     try {
-      const role = await Models.Role.findByPk(id);
-
-      if (!role) {
-        throw new Error(`The role with id=${id} does not exist.`);
-      }
-      if (!role.active) {
-        throw new Error(`The role "${role.title}" with id=${role.id} is inactive.`);
-      }
+      const role = await this.getRoleByIdAndCheck(id);
       
       const rolesPrivileges = await Models.RolePrivilege.findAll({
         where: { idRole: role.id },
@@ -170,6 +201,10 @@ class RbacService {
           },
         ],
       });
+      if (!rolesPrivileges || !rolesPrivileges.length) {
+        throw new RolePrivilegeErrorHandler(RolePrivilegeErrorHandler.RolePrivilegesDoNotExist);
+      }
+
       return {
         role: role.title,
         privileges: rolesPrivileges.reduce((
@@ -204,13 +239,18 @@ class RbacService {
       });
 
       if (existingRole) {
-        throw new Error(`The role "${existingRole.title}" already exists.`);
+        throw new RolePrivilegeErrorHandler(RolePrivilegeErrorHandler.RoleAlreadyExists);
       }
 
       const role = new Models.Role(data.role);
       await role.save();
 
-      this.setPrivilegesToRoleId(role.id, data.privileges);
+      try {
+        await this.setPrivilegesToRoleId(role.id, data.privileges);
+      } catch (err) {
+        role.destroy();
+        throw err;
+      }
 
       await AccessControl.init();
       return role.id;
@@ -221,18 +261,11 @@ class RbacService {
 
   public async setPrivilegesByRoleId (id: number, data: PermissionsAndGrantsSetParams): Promise<number> {
     try {
-      const role = await Models.Role.findByPk(id);
+      const role = await this.getRoleByIdAndCheck(id);
 
-      if (!role) {
-        throw new Error(`The role with id=${id} does not exist.`);
-      }
-      if (!role.active) {
-        throw new Error(`The role "${role.title}" with id=${role.id} is inactive.`);
-      }
-
-      this.setPrivilegesToRoleId(role.id, data);
-
+      await this.setPrivilegesToRoleId(role.id, data);
       await AccessControl.init();
+
       return role.id;
     } catch (err) {
       throw err;
@@ -241,14 +274,8 @@ class RbacService {
 
   public async deleteRoleAndPrivileges (id: number): Promise<void> {
     try {
-      const role = await Models.Role.findByPk(id);
-
-      if (!role) {
-        throw new Error(`The role with id=${id} does not exist.`);
-      }
-      if (!role.active) {
-        throw new Error(`The role "${role.title}" with id=${role.id} is inactive.`);
-      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const role = await this.getRoleByIdAndCheck(id);
 
       // ---
       // delete if needed
@@ -258,6 +285,7 @@ class RbacService {
       throw err;
     }
   }
+  //#endregion
 }
 
 const rbacService = new RbacService();
