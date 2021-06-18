@@ -73,7 +73,6 @@ export class RbacController extends Controller {
       this.log.info(`Route /rbac PATCH role privileges with role id=${roleId} and data: ${JSON.stringify(data)}`);
       return await rbacService.setPrivilegesByRoleId(roleId, data);
     } catch (err) {
-      console.log('TEST: ', err);
       this.log.error(`Route /rbac PATCH with err: ${err}`);
       throw err;
     }
@@ -89,7 +88,6 @@ export class RbacController extends Controller {
       this.log.info(`Route /rbac DELETE role privileges with role id=${roleId}`);
       return await rbacService.deleteRoleAndPrivileges(roleId);
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac DELETE with err: ${err}`);
       throw err;
     }

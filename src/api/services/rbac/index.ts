@@ -53,7 +53,6 @@ class RbacService {
 
       return modelObject;
     } catch (err) {
-      console.log('QWE_123');
       throw err;
     }
   }
@@ -131,7 +130,6 @@ class RbacService {
             }
           });
         } catch (err) {
-          console.log(err);
           throw err;
         }
       }));
