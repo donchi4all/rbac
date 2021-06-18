@@ -1,12 +1,12 @@
 export interface RolePrivilegeInterface {
   id: number;
-  idRole: number;
-  idPermission: number;
-  idGrant: number;
-  idGrantType: number;
+  roleId: number;
+  permissionId: number;
+  grantId: number;
+  grantTypeId: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type RolePrivilegeCreationType =
-  Pick<RolePrivilegeInterface, 'idRole' | 'idPermission' | 'idGrant' | 'idGrantType'>;
+  Pick<RolePrivilegeInterface, 'roleId' | 'permissionId' | 'grantId' | 'grantTypeId'>;

@@ -13,48 +13,48 @@ export class RolePrivilege extends Model<RolePrivilegeInterface, RolePrivilegeCr
   id: number;
 
   @BelongsTo(() => Models.Role, {
-    foreignKey: 'idRole',
-    as: 'fkIdRole',
+    foreignKey: 'roleId',
+    as: 'fkRoleId',
     foreignKeyConstraint: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @AllowNull(false)
   @Column(DataType.INTEGER)
-  idRole: number;
+  roleId: number;
 
   @BelongsTo(() => Models.Permission, {
-    foreignKey: 'idPermission',
-    as: 'fkIdPermission',
+    foreignKey: 'permissionId',
+    as: 'fkPermissionId',
     foreignKeyConstraint: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @AllowNull(false)
   @Column(DataType.INTEGER)
-  idPermission: number;
+  permissionId: number;
 
   @BelongsTo(() => Models.Grant, {
-    foreignKey: 'idGrant',
-    as: 'fkIdGrant',
+    foreignKey: 'grantId',
+    as: 'fkGrantId',
     foreignKeyConstraint: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @AllowNull(false)
   @Column(DataType.INTEGER)
-  idGrant: number;
+  grantId: number;
 
   @BelongsTo(() => Models.GrantType, {
-    foreignKey: 'idGrantType',
-    as: 'fkIdGrantType',
+    foreignKey: 'grantTypeId',
+    as: 'fkGrantTypeId',
     foreignKeyConstraint: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @AllowNull(false)
   @Column(DataType.INTEGER)
-  idGrantType: number;
+  grantTypeId: number;
 
   @CreatedAt
   @Column({

@@ -123,10 +123,10 @@ class RbacService {
 
           return Models.RolePrivilege.findOrCreate({
             where: {
-              idGrant: grant.id,
-              idGrantType: grantType.id,
-              idRole: roleId,
-              idPermission: permission.id,
+              roleId: roleId,
+              grantId: grant.id,
+              grantTypeId: grantType.id,
+              permissionId: permission.id,
             }
           });
         } catch (err) {
@@ -181,7 +181,7 @@ class RbacService {
       const role = await this.getRoleByIdAndCheck(id);
       
       const rolesPrivileges = await Models.RolePrivilege.findAll({
-        where: { idRole: role.id },
+        where: { roleId: role.id },
         include: [
           {
             model: Models.Grant,
@@ -209,9 +209,9 @@ class RbacService {
             result: Record<string, Record<string, string>>,
             privilege: Models.RolePrivilege,
           ) => {
-            const permission = privilege.fkIdPermission.title;
-            const grant = privilege.fkIdGrant.title;
-            const grantType = privilege.fkIdGrantType.name;
+            const permission = privilege.fkPermissionId.title;
+            const grant = privilege.fkGrantId.title;
+            const grantType = privilege.fkGrantTypeId.name;
             if (!result[permission]) {
               result[permission] = { [grant]: grantType };
             } else {
