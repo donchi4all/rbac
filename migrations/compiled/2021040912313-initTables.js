@@ -177,7 +177,7 @@ const migrationCommands = [
           'primaryKey': true,
           'type': Sequelize.INTEGER
         },
-        'idRole': {
+        'roleId': {
           'onDelete': 'CASCADE',
           'onUpdate': 'CASCADE',
           'references': {
@@ -187,7 +187,7 @@ const migrationCommands = [
           'allowNull': false,
           'type': Sequelize.INTEGER
         },
-        'idPermission': {
+        'permissionId': {
           'onDelete': 'CASCADE',
           'onUpdate': 'CASCADE',
           'references': {
@@ -197,7 +197,7 @@ const migrationCommands = [
           'allowNull': false,
           'type': Sequelize.INTEGER
         },
-        'idGrant': {
+        'grantId': {
           'onDelete': 'CASCADE',
           'onUpdate': 'CASCADE',
           'references': {
@@ -207,7 +207,7 @@ const migrationCommands = [
           'allowNull': false,
           'type': Sequelize.INTEGER
         },
-        'idGrantType': {
+        'grantTypeId': {
           'onDelete': 'CASCADE',
           'onUpdate': 'CASCADE',
           'references': {
