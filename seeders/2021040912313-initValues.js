@@ -122,28 +122,28 @@ module.exports = {
 
     const insertRolePrivileges = queryInterface.bulkInsert('rolePrivilege', [
       {
-        idRole: 1,
-        idPermission: 1,
-        idGrant: 1,
-        idGrantType: 2,
+        roleId: 1,
+        permissionId: 1,
+        grantId: 1,
+        grantTypeId: 2,
       },
       {
-        idRole: 1,
-        idPermission: 1,
-        idGrant: 2,
-        idGrantType: 2,
+        roleId: 1,
+        permissionId: 1,
+        grantId: 2,
+        grantTypeId: 2,
       },
       {
-        idRole: 1,
-        idPermission: 1,
-        idGrant: 3,
-        idGrantType: 2,
+        roleId: 1,
+        permissionId: 1,
+        grantId: 3,
+        grantTypeId: 2,
       },
       {
-        idRole: 1,
-        idPermission: 1,
-        idGrant: 4,
-        idGrantType: 2,
+        roleId: 1,
+        permissionId: 1,
+        grantId: 4,
+        grantTypeId: 2,
       },
     ]);
 
