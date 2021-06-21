@@ -22,7 +22,7 @@ import
     PermissionInterface,
     PermissionsAndGrantsCreationParams,
     PermissionsAndGrantsSetParams,
-    RolePrivilegeType,
+    // RolePrivilegeType,
   }
 from '../../services/rbac';
 
@@ -42,9 +42,8 @@ export class RbacController extends Controller {
   ): Promise<unknown> {
     try {
       this.log.info(`Route /rbac GET role privileges with role ID: ${roleId}`);
-      return await rbacService.getPermissionsByRoleIdNew(roleId);
+      return await rbacService.getPermissionsByRoleId(roleId);
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac GET with err: ${err}`);
       throw err;
     }
@@ -59,7 +58,6 @@ export class RbacController extends Controller {
       this.log.info(`Route /rbac POST role privileges with data: ${JSON.stringify(data)}`);
       return await rbacService.addPermissionsGrantsToNewRole(data);
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac PATCH with err: ${err}`);
       throw err;
     }
@@ -75,7 +73,6 @@ export class RbacController extends Controller {
       this.log.info(`Route /rbac PATCH role privileges with role id=${roleId} and data: ${JSON.stringify(data)}`);
       return await rbacService.setPrivilegesByRoleId(roleId, data);
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac PATCH with err: ${err}`);
       throw err;
     }
@@ -91,7 +88,6 @@ export class RbacController extends Controller {
       this.log.info(`Route /rbac DELETE role privileges with role id=${roleId}`);
       return await rbacService.deleteRoleAndPrivileges(roleId);
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac DELETE with err: ${err}`);
       throw err;
     }
@@ -105,7 +101,6 @@ export class RbacController extends Controller {
     try {
       return await rbacService.getRoles();
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac/role GET with err: ${err}`);
       throw err;
     }
@@ -119,7 +114,6 @@ export class RbacController extends Controller {
     try {
       return await rbacService.getGrants();
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac/grant GET with err: ${err}`);
       throw err;
     }
@@ -133,7 +127,6 @@ export class RbacController extends Controller {
     try {
       return await rbacService.getPermissions();
     } catch (err) {
-      this.setStatus(httpStatuses.badReguest.code);
       this.log.error(`Route /rbac/permission GET with err: ${err}`);
       throw err;
     }

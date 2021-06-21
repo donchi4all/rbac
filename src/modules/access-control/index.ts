@@ -34,9 +34,9 @@ class AccessControl {
         ],
       });
       const grantsList = rolesPrivileges.map(record => ({
-        role: record.fkIdRole.title,
-        resource: record.fkIdPermission.title,
-        action: `${record.fkIdGrant.title}:${record.fkIdGrantType.name}`,
+        role: record.fkRoleId.title,
+        resource: record.fkPermissionId.title,
+        action: `${record.fkGrantId.title}:${record.fkGrantTypeId.name}`,
         attributes: '*',
       }));
       

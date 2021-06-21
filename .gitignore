@@ -7,6 +7,10 @@ pids
 logs
 tmp
 
+# Routes and Swagger generation
+src/modules/routes/routes.ts
+src/modules/routes/swagger.json
+
 # Log files
 *.log
 

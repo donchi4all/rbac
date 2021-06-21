@@ -1,27 +1,16 @@
-import { ErrorInterface } from './IError';
+import { ErrorHandler } from './ErrorHandler';
+import { CommonErrorHandler } from './CommonErrorHandler';
 
-export class BaseError extends Error {
-  public status: number;
+import { RolePrivilegeErrorHandler } from './RolePrivilegeErrorHandler';
 
+export {
   /**
-   * Constructor
-   * @param args - Object of Error Interface: { code, message }
+   * default
    */
-  constructor (args: ErrorInterface) {
-    super(args.message);
-    this.name = this.constructor.name;
-    this.status = args.status;
-    Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
-  }
-}
-
-export class HttpRequestError extends BaseError {
+  ErrorHandler,
   /**
-   * Constructor
-   * @param message - Error message
-   * @param code - Error code
+   * custom
    */
-  constructor (public message: string, public status: number = 400) {
-    super({ message, status });
-  }
-}
+  CommonErrorHandler,
+  RolePrivilegeErrorHandler,
+};
