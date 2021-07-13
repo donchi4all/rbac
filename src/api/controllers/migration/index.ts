@@ -19,11 +19,11 @@ export class MigrationController extends Controller {
   @LoggerDecorator('Controller.Migration')
   private log: LoggerInterface;
   //#endregion
-  
+
   //#region "/migration" ENDPOINT
   @Post('/migration')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
-  public async createMigration (
+  public async createMigration(
     @Body() requestBody: { name: string }
   ): Promise<{ msg: string }> {
     try {

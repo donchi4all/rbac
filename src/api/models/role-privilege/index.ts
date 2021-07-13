@@ -1,4 +1,4 @@
-import { Table, AutoIncrement, PrimaryKey, Column, AllowNull, Default, CreatedAt, UpdatedAt, DataType, Model, BelongsTo } from 'sequelize-typescript';
+import { Table, AutoIncrement, PrimaryKey, Column, AllowNull, CreatedAt, UpdatedAt, DataType, Model, BelongsTo } from 'sequelize-typescript';
 import { RolePrivilegeInterface, RolePrivilegeCreationType } from './IRolePrivilege';
 import * as Models from '../index';
 
