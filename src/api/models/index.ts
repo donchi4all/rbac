@@ -1,21 +1,22 @@
-import { Entity } from './entity';
-import { Grant } from './grant';
-import { GrantType } from './grant-type';
-import { Permission } from './permission';
-import { Platform } from './platform';
+
 import { Role } from './role';
-import { RolePrivilege } from './role-privilege';
-import { UserPlatform } from './user-platform';
-import { UserRole } from './user-role';
+import { Platform } from './platform';
+import { Workflow } from './workflow';
+import { Business } from './business';
+import { Permission } from './permission';
+import { RolePermission } from './role-permission';
+import { WorkflowRequest } from './workflow-request';
+import { BusinessUserRole } from './business-user-role';
+import { WorkflowablePermission } from './workflowable-permission';
 
 export {
-  Entity,
-  Grant,
-  GrantType,
-  Permission,
-  Platform,
   Role,
-  RolePrivilege,
-  UserPlatform,
-  UserRole,
+  Platform,
+  Business,
+  Workflow,
+  Permission,
+  RolePermission,
+  WorkflowRequest,
+  BusinessUserRole,
+  WorkflowablePermission
 };

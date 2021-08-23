@@ -1,31 +1,32 @@
 import { 
-  Table,
+  Table, 
   AutoIncrement,
   PrimaryKey,
   Column,
   Model,
-  AllowNull,
-  CreatedAt,
+  DataType,
   UpdatedAt,
-  DataType
+  CreatedAt,
+  AllowNull,
+  Default 
 } from 'sequelize-typescript';
+import { BusinessInterface } from './IBusiness';
 import { StringsFormating as Str} from '../../../utils';
-import { RoleInterface, RoleCreationType } from './IRole';
 
 @Table({
-  tableName: 'role',
+  tableName: 'business'
 })
-export class Role extends Model<RoleInterface, RoleCreationType> {
+export class Business extends Model<BusinessInterface> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
-  id: number;
+  id: BusinessInterface['id'];
+  
+  @Column(DataType.INTEGER)
+  platformId: BusinessInterface['platformId'];
 
   @Column(DataType.STRING)
-  businessId: RoleInterface['businessId'];
-
-  @Column(DataType.STRING)
-  title: RoleInterface['title'];
+  name: BusinessInterface['name'];
 
   @Column({
     type: DataType.STRING,
@@ -33,26 +34,27 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
       this.setDataValue('slug', Str.toSlugCase(value));
     }
   })
-  slug: RoleInterface['slug'];
+  slug: BusinessInterface['slug'];
 
   @AllowNull
   @Column(DataType.STRING)
-  description?: RoleInterface['description'];
+  description: BusinessInterface['description'];
 
-  @Column(DataType.STRING)
-  isActive: RoleInterface['isActive'];
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isActive?: BusinessInterface['isActive'];
 
   @CreatedAt
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
-  createdAt: RoleInterface['createdAt'];
+  createdAt: BusinessInterface['createdAt'];
 
   @UpdatedAt
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
-  updatedAt: RoleInterface['updatedAt'];
+  updatedAt: BusinessInterface['updatedAt'];
 }

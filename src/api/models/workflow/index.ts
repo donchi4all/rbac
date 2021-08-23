@@ -4,28 +4,28 @@ import {
   PrimaryKey,
   Column,
   Model,
-  AllowNull,
+  DataType,
   CreatedAt,
-  UpdatedAt,
-  DataType
+  UpdatedAt, 
+  AllowNull
 } from 'sequelize-typescript';
+import { WorkflowInterface } from './IWorkflow';
 import { StringsFormating as Str} from '../../../utils';
-import { RoleInterface, RoleCreationType } from './IRole';
 
 @Table({
-  tableName: 'role',
+  tableName: 'workflow'
 })
-export class Role extends Model<RoleInterface, RoleCreationType> {
+export class Workflow extends Model<WorkflowInterface> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
-  id: number;
+  id: WorkflowInterface['id'];
 
   @Column(DataType.STRING)
-  businessId: RoleInterface['businessId'];
+  businessId: WorkflowInterface['businessId'];
 
   @Column(DataType.STRING)
-  title: RoleInterface['title'];
+  title: WorkflowInterface['title'];
 
   @Column({
     type: DataType.STRING,
@@ -33,26 +33,26 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
       this.setDataValue('slug', Str.toSlugCase(value));
     }
   })
-  slug: RoleInterface['slug'];
+  slug: WorkflowInterface['slug'];
 
   @AllowNull
   @Column(DataType.STRING)
-  description?: RoleInterface['description'];
+  description: WorkflowInterface['description'];
 
   @Column(DataType.STRING)
-  isActive: RoleInterface['isActive'];
+  process: WorkflowInterface['process'];
 
   @CreatedAt
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
-  createdAt: RoleInterface['createdAt'];
+  createdAt: WorkflowInterface['createdAt'];
 
   @UpdatedAt
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
-  updatedAt: RoleInterface['updatedAt'];
+  updatedAt: WorkflowInterface['updatedAt'];
 }
