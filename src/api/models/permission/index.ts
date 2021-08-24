@@ -8,33 +8,29 @@ export class Permission extends Model<PermissionInterface, PermissionCreationTyp
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
-  id: number;
+  id: PermissionInterface['id'];
 
-  @AllowNull(false)
-  @Column(DataType.STRING(255))
-  title: string;
+  @Column(DataType.STRING)
+  title: PermissionInterface['title'];
 
-  @Column({
-    type: DataType.STRING(255),
-    defaultValue: '',
-  })
-  description: string;
+  @AllowNull
+  @Column(DataType.STRING)
+  description: PermissionInterface['description'];
 
-  @AllowNull(false)
   @Column(DataType.BOOLEAN)
-  active: boolean;
+  isActive: PermissionInterface['isActive'];
 
   @CreatedAt
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
-  createdAt!: Date;
+  createdAt!: PermissionInterface['createdAt'];
 
   @UpdatedAt
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
-  updatedAt!: Date;
+  updatedAt!: PermissionInterface['updatedAt'];
 }

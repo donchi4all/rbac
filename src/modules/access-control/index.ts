@@ -8,45 +8,7 @@ class AccessControl {
   private log: LoggerInterface;
   private accessControl: ac.AccessControl;
 
-  public async init (): Promise<void> {
-    try {
-      const rolesPrivileges = await Models.RolePrivilege.findAll({
-        include: [
-          {
-            model: Models.Role,
-            attributes: ['title'],
-            where: { active: true },
-          },
-          {
-            model: Models.Grant,
-            attributes: ['title'],
-            where: { active: true },
-          },
-          {
-            model: Models.GrantType,
-            attributes: ['name'],
-          },
-          {
-            model: Models.Permission,
-            attributes: ['title'],
-            where: { active: true },
-          },
-        ],
-      });
-      const grantsList = rolesPrivileges.map(record => ({
-        role: record.fkRoleId.title,
-        resource: record.fkPermissionId.title,
-        action: `${record.fkGrantId.title}:${record.fkGrantTypeId.name}`,
-        attributes: '*',
-      }));
-      
-      this.accessControl = new ac.AccessControl(grantsList);
-      this.log.info('Access Control has been initialized with grants list successfully.');
-    } catch (err) {
-      this.log.error(`There is an error with Access Control initialization: ${err}`);
-      throw err;
-    }
-  }
+  public async init (): Promise<void> { }
 
   public checkAccess (role: string): ac.Query {
     return this.accessControl.can(role);

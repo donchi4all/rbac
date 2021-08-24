@@ -21,7 +21,7 @@ export class MigrationController extends Controller {
   //#endregion
 
   //#region "/migration" ENDPOINT
-  @Post('/migration')
+  @Post('/')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async createMigration(
     @Body() requestBody: { name: string }

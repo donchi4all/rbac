@@ -4,14 +4,14 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "npm run postinstall && nodemon index.ts",
+    "start": "npm run build-routes && nodemon index.ts",
     "build": "npm run build-routes && tsc && npm run lint",
     "build-routes": "tsoa spec-and-routes",
     "postinstall": "cp -R node_modules_patches/ node_modules/",
     "test": "jest --forceExit --coverage --verbose",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
-    "db-migrate": "npx sequelize-cli-typescript db:migrate",
-    "db-seed": "npx sequelize-cli-typescript db:seed:all"
+    "db-migrate": "node ./node_modules/sequelize-cli-typescript/lib/sequelize db:migrate",
+    "db-seed": "node ./node_modules/sequelize-cli-typescript/lib/sequelize db:seed:all"
   },
   "repository": {
     "type": "git",
