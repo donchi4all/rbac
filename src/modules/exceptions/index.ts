@@ -2,7 +2,7 @@ import { ErrorHandler } from './ErrorHandler';
 import { CommonErrorHandler } from './CommonErrorHandler';
 
 import { RolePrivilegeErrorHandler } from './RolePrivilegeErrorHandler';
-
+import { PlatformErrorHandler } from './PlatformErrorHandler';
 export {
   /**
    * default
@@ -13,4 +13,5 @@ export {
    */
   CommonErrorHandler,
   RolePrivilegeErrorHandler,
+  PlatformErrorHandler
 };
