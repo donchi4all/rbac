@@ -1,5 +1,5 @@
-import { 
-  Table, 
+import {
+  Table,
   AutoIncrement,
   PrimaryKey,
   Column,
@@ -8,33 +8,45 @@ import {
   UpdatedAt,
   CreatedAt,
   AllowNull,
-  Default 
+  Default,
+  Unique,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { BusinessInterface } from './IBusiness';
-import { StringsFormating as Str} from '../../../utils';
+import { StringsFormating as Str } from '../../../utils';
+import { Platform } from '../platform';
 
 @Table({
-  tableName: 'business'
+  tableName: 'business',
 })
 export class Business extends Model<BusinessInterface> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
   id: BusinessInterface['id'];
-  
+
   @Column(DataType.INTEGER)
   platformId: BusinessInterface['platformId'];
 
   @Column(DataType.STRING)
   name: BusinessInterface['name'];
 
+  @Unique
   @Column({
     type: DataType.STRING,
-        set (value: string): void {
+    set(value: string): void {
       this.setDataValue('slug', Str.toSlugCase(value));
-    }
+    },
   })
   slug: BusinessInterface['slug'];
+
+  @BelongsTo(() => Platform, {
+    foreignKey: 'platformId',
+    foreignKeyConstraint: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  platform: Platform;
 
   @AllowNull
   @Column(DataType.STRING)

@@ -2,6 +2,8 @@ import { ErrorHandler } from './ErrorHandler';
 import { CommonErrorHandler } from './CommonErrorHandler';
 
 import { RolePrivilegeErrorHandler } from './RolePrivilegeErrorHandler';
+import { BusinessErrorHandler } from './BusinessErrorHandler';
+
 
 export {
   /**
@@ -13,4 +15,5 @@ export {
    */
   CommonErrorHandler,
   RolePrivilegeErrorHandler,
+  BusinessErrorHandler,
 };
