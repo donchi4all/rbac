@@ -36,7 +36,7 @@ export interface IWorkflowService {
      * @returns 
      */
     updateWorkflow (
-        workflowId: WorkflowInterface['id'], 
+        workflowId: string, 
         payload: WorkflowEditRequestType
     ):  Promise<Workflow>
 

@@ -1,10 +1,10 @@
 import { Op } from 'sequelize';
 import { Workflow } from '../../models';
-import { 
-  WorkflowCreationRequestType, 
-  WorkflowCreationType, 
-  WorkflowEditRequestType, 
-  WorkflowInterface 
+import {  
+  WorkflowInterface,
+  WorkflowCreationType,
+  WorkflowEditRequestType,
+  WorkflowCreationRequestType,
 } from '../../models/workflow/IWorkflow';
 import { IWorkflowService } from './IWorkflowService';
 import { WorkflowErrorHandler } from '../../../modules/exceptions';
@@ -78,17 +78,11 @@ class WorkflowService implements IWorkflowService {
    * @returns 
    */
   public async updateWorkflow (
-    workflowId: WorkflowInterface['id'], 
+    workflowId: string, 
     payload: WorkflowEditRequestType
   ): Promise<Workflow> {
     try {
-      const workflow = await Workflow.findOne({ 
-        where: { id: workflowId } 
-      });
-
-      if (!workflow) {
-        return Promise.reject(new WorkflowErrorHandler(WorkflowErrorHandler.NotExist));
-      }
+      const workflow = await this.findWorkflow(workflowId);
 
       const [title, slug] = Array(2).fill(payload.title || workflow.title);
       await workflow.update({...workflow, ...payload, title, slug});
