@@ -18,7 +18,6 @@ import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 
 
 @Route('role')
-@Hidden()
 export class roleController extends Controller {
   /**
    * Initialize logger
