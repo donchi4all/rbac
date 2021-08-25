@@ -18,7 +18,6 @@ import { WorkflowCreationRequestType } from '../../../api/models/workflow/IWorkf
 
 
 @Route('workflow')
-@Hidden()
 export class workflowController extends Controller {
   /**
    * Initialize logger
