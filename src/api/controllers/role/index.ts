@@ -17,7 +17,7 @@ import { RoleCreationRequestType } from '../../../api/models/role/IRole';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 
 
-@Route('role')
+@Route('{business}/role')
 export class roleController extends Controller {
   /**
    * Initialize logger
@@ -59,35 +59,31 @@ export class roleController extends Controller {
 
   @Get('/')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async listRoles(
-    @Body() requestBody: { title: string }
-  ): Promise<Role[]> {
+  public async listRoles(business: string): Promise<Role[]> {
     try {
-      return await roleService.listRoles(requestBody.title);
+      return await roleService.listRoles(business);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Get('{id}')
+  @Get('{roleIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async findRole ( id: string ): Promise<Role> {
+  public async findRole ( roleIdentifier: string ): Promise<Role> {
     try{
-      return await roleService.findRole(id);
+      return await roleService.findRole(roleIdentifier);
     } catch (err) {
-      this.log.error(`Failed to find beneficiary with id: ${id}`, err);
+      this.log.error(`Failed to find role with id: ${roleIdentifier}`, err);
       throw err;
     }
   }
 
-  @Delete('/')
+  @Delete('{roleIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async deleteRole(
-    @Body() requestBody: { title: string }
-  ): Promise<void> {
+  public async deleteRole(roleIdentifier: string): Promise<void> {
     try {
-      return await roleService.deleteRole(requestBody.title);
+      return await roleService.deleteRole(roleIdentifier);
     } catch (err) {
       this.log.error(`Route /role DELETE with err: ${err}`);
       throw err;
