@@ -11,6 +11,9 @@ export class Permission extends Model<PermissionInterface, PermissionCreationTyp
   id: PermissionInterface['id'];
 
   @Column(DataType.STRING)
+  platformId: PermissionInterface['platformId'];
+
+  @Column(DataType.STRING)
   title: PermissionInterface['title'];
 
   @AllowNull
