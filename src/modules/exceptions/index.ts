@@ -5,7 +5,7 @@ import { WorkflowErrorHandler } from './WorkflowErrorHandler';
 import { PermissionErrorHandler } from './PermissionErrorHandler';
 
 import { RolePrivilegeErrorHandler } from './RolePrivilegeErrorHandler';
-
+import { PlatformErrorHandler } from './PlatformErrorHandler';
 export {
   /**
    * default
@@ -19,4 +19,5 @@ export {
   WorkflowErrorHandler,
   PermissionErrorHandler,
   RolePrivilegeErrorHandler,
+  PlatformErrorHandler
 };
