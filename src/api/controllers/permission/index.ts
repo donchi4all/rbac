@@ -18,7 +18,7 @@ import { PermissionEditRequestType } from '../../../api/models/permission/IPermi
 import { PermissionCreationRequestType } from '../../../api/models/permission/IPermission';
 
 
-@Route('permission')
+@Route('{platform}/permission')
 export class permissionController extends Controller {
   /**
    * Initialize logger
@@ -59,7 +59,7 @@ export class permissionController extends Controller {
     }
   }
 
-  @Get('/{platform}')
+  @Get('/')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listPermissions( platform: string ): Promise<Array<Permission>> {
     try {
@@ -70,13 +70,13 @@ export class permissionController extends Controller {
     }
   }
 
-  @Get('{id}')
+  @Get('{permissionIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async findPermission ( id: string ): Promise<Permission> {
+  public async findPermission ( permissionIdentifier: string ): Promise<Permission> {
     try{
-      return await permissionService.findPermission(id);
+      return await permissionService.findPermission(permissionIdentifier);
     } catch (err) {
-      this.log.error(`Failed to find beneficiary with id: ${id}`, err);
+      this.log.error(`Failed to find beneficiary with permissionIdentifier: ${permissionIdentifier}`, err);
       throw err;
     }
   }
