@@ -45,7 +45,7 @@ class PermissionService implements IPermissionService {
    * @returns 
    */
   public async updatePermission (
-    permissionId: PermissionInterface['id'], 
+    permissionId: string, 
     payload: PermissionEditRequestType
   ): Promise<Permission> {
     try {
@@ -71,10 +71,10 @@ class PermissionService implements IPermissionService {
    * 
    * @returns 
    */
-  public async listPermissions (platformId: PermissionInterface['platformId']): Promise<Array<Permission>> {
+  public async listPermissions (platformId: string ): Promise<Array<Permission>> {
     try {
       return await Permission.findAll({
-        where: { platformId }
+        // where: { platformId }
       });
     } catch (err) {
       throw err;

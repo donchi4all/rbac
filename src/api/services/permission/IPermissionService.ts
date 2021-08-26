@@ -24,7 +24,7 @@ export interface IPermissionService {
      * @returns 
      */
     updatePermission (
-        permissionId: PermissionInterface['id'], 
+        permissionId: string, 
         payload: PermissionEditRequestType
     ):  Promise<Permission>
 

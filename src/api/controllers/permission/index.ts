@@ -10,14 +10,15 @@ import {
   SuccessResponse,
 } from 'tsoa';
 
+import { Permission } from '../../../api/models';
 import httpStatuses from '../../httpStatuses';
 import permissionService from '../../services/permission';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
-import { Permission } from 'accesscontrol';
+import { PermissionEditRequestType } from '../../../api/models/permission/IPermission';
+import { PermissionCreationRequestType } from '../../../api/models/permission/IPermission';
 
 
 @Route('permission')
-@Hidden()
 export class permissionController extends Controller {
   /**
    * Initialize logger
@@ -34,36 +35,35 @@ export class permissionController extends Controller {
   @Post('/')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async createPermission(
-    @Body() requestBody: { title: string }
-  ): Promise<{ msg: string }> {
+    @Body() requestBody: PermissionCreationRequestType|PermissionCreationRequestType[]
+  ): Promise<Permission[]> {
     try {
-      return permissionService.createPermission(requestBody.title);
+      return permissionService.createPermission(requestBody);
     } catch (err) {
       this.log.error(`Route /permission POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Put('/')
+  @Put('/{permission}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async updatePermission(
-    @Body() requestBody: { title: string }
-  ): Promise<{ msg: string }> {
+    permission: string,
+    @Body() requestBody: PermissionEditRequestType
+  ): Promise<Permission> {
     try {
-      return permissionService.updatePermission(requestBody.title);
+      return permissionService.updatePermission(permission, requestBody);
     } catch (err) {
       this.log.error(`Route /permission POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Get('/')
+  @Get('/{platform}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async listPermissions(
-    @Body() requestBody: { title: string }
-  ): Promise<{ msg: string }> {
+  public async listPermissions( platform: string ): Promise<Array<Permission>> {
     try {
-      return permissionService.listPermissions(requestBody.title);
+      return permissionService.listPermissions(platform);
     } catch (err) {
       this.log.error(`Route /permission POST with err: ${err}`);
       throw err;
@@ -81,13 +81,11 @@ export class permissionController extends Controller {
     }
   }
 
-  @Delete('/')
+  @Delete('/{permission}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async deletePermission(
-    @Body() requestBody: { title: string }
-  ): Promise<{ msg: string }> {
+  public async deletePermission( permission: string): Promise<void> {
     try {
-      return permissionService.deletePermission(requestBody.title);
+      return permissionService.deletePermission(permission);
     } catch (err) {
       this.log.error(`Route /permission DELETE with err: ${err}`);
       throw err;
