@@ -17,7 +17,7 @@ import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 import { WorkflowCreationRequestType } from '../../../api/models/workflow/IWorkflow';
 
 
-@Route('workflow')
+@Route('{business}/workflow')
 export class workflowController extends Controller {
   /**
    * Initialize logger
@@ -44,13 +44,14 @@ export class workflowController extends Controller {
     }
   }
 
-  @Put('/')
+  @Put('{workflowIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async updateWorkflow(
+    workflowIdentifier: string,
     @Body() requestBody: WorkflowCreationRequestType
   ): Promise<Workflow> {
     try {
-      return await workflowService.updateWorkflow(requestBody.title, requestBody);
+      return await workflowService.updateWorkflow(workflowIdentifier, requestBody);
     } catch (err) {
       this.log.error(`Route /workflow POST with err: ${err}`);
       throw err;
@@ -59,35 +60,31 @@ export class workflowController extends Controller {
 
   @Get('/')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async listWorkflows(
-    @Body() requestBody: { title: string }
-  ): Promise<Workflow[]> {
+  public async listWorkflows(business: string): Promise<Workflow[]> {
     try {
-      return await workflowService.listWorkflows(requestBody.title);
+      return await workflowService.listWorkflows(business);
     } catch (err) {
       this.log.error(`Route /workflow POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Get('{id}')
+  @Get('{workflowIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async findWorkflow ( id: string ): Promise<Workflow> {
+  public async findWorkflow ( workflowIdentifier: string ): Promise<Workflow> {
     try{
-      return await workflowService.findWorkflow(id);
+      return await workflowService.findWorkflow(workflowIdentifier);
     } catch (err) {
-      this.log.error(`Failed to find beneficiary with id: ${id}`, err);
+      this.log.error(`Failed to find beneficiary with workflowIdentifier: ${workflowIdentifier}`, err);
       throw err;
     }
   }
 
-  @Delete('/')
+  @Delete('{workflowIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async deleteWorkflow(
-    @Body() requestBody: { title: string }
-  ): Promise<void> {
+  public async deleteWorkflow(workflowIdentifier: string): Promise<void> {
     try {
-      return await workflowService.deleteWorkflow(requestBody.title);
+      return await workflowService.deleteWorkflow(workflowIdentifier);
     } catch (err) {
       this.log.error(`Route /workflow DELETE with err: ${err}`);
       throw err;
