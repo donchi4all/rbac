@@ -1,10 +1,11 @@
 import { ErrorHandler } from './ErrorHandler';
+import { RoleErrorHandler } from './RoleErrorHandler';
 import { CommonErrorHandler } from './CommonErrorHandler';
+import { WorkflowErrorHandler } from './WorkflowErrorHandler';
+import { PermissionErrorHandler } from './PermissionErrorHandler';
 
 import { RolePrivilegeErrorHandler } from './RolePrivilegeErrorHandler';
-import { BusinessErrorHandler } from './BusinessErrorHandler';
-
-
+import { PlatformErrorHandler } from './PlatformErrorHandler';
 export {
   /**
    * default
@@ -13,7 +14,10 @@ export {
   /**
    * custom
    */
+  RoleErrorHandler,
   CommonErrorHandler,
+  WorkflowErrorHandler,
+  PermissionErrorHandler,
   RolePrivilegeErrorHandler,
-  BusinessErrorHandler,
+  PlatformErrorHandler
 };
