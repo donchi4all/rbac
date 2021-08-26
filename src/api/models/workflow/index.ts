@@ -1,21 +1,21 @@
 import { 
-  Table,
-  AutoIncrement,
-  PrimaryKey,
-  Column,
   Model,
-  DataType,
+  Table,
+  Column,
+  DataType, 
+  AllowNull,
   CreatedAt,
-  UpdatedAt, 
-  AllowNull
+  UpdatedAt,
+  PrimaryKey,
+  AutoIncrement
 } from 'sequelize-typescript';
-import { WorkflowInterface } from './IWorkflow';
 import { StringsFormating as Str} from '../../../utils';
+import { WorkflowCreationType, WorkflowInterface } from './IWorkflow';
 
 @Table({
   tableName: 'workflow'
 })
-export class Workflow extends Model<WorkflowInterface> {
+export class Workflow extends Model<WorkflowInterface, WorkflowCreationType> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
@@ -29,7 +29,7 @@ export class Workflow extends Model<WorkflowInterface> {
 
   @Column({
     type: DataType.STRING,
-        set (value: string): void {
+    set (value: string): void {
       this.setDataValue('slug', Str.toSlugCase(value));
     }
   })
