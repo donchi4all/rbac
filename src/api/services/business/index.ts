@@ -113,20 +113,18 @@ class BusinessService implements IBusinessService {
   public async listBusiness(
     platformSlug: PlatformInterface['slug']
   ): Promise<Array<BusinessInterface>> {
-    try {
+
+      const platform = await platformService.findPlatform(platformSlug);
       const business = await Business.findAll({
         include: [
           {
             model: Platform,
             attributes: ['name', 'slug', 'description'],
-            where: { isActive: true },
+            where: { id: platform.id },
           },
         ],
       });
       return business as Array<BusinessInterface>;
-    } catch (err) {
-      throw err;
-    }
   }
 
   /**
