@@ -11,9 +11,9 @@ import {
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
-import roleService from '../../services/role';
+import roleService, {RolePermissionInterface} from '../../services/role';
 import { Role } from '../../../api/models';
-import { RoleCreationRequestType } from '../../../api/models/role/IRole';
+import {RoleCreationRequestType, RoleInterface} from '../../../api/models/role/IRole';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 
 
@@ -86,6 +86,23 @@ export class roleController extends Controller {
       return await roleService.deleteRole(roleIdentifier);
     } catch (err) {
       this.log.error(`Route /role DELETE with err: ${err}`);
+      throw err;
+    }
+  }
+
+  @Post('/{businessId}/sync/permissions')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async syncRoleWithPermissions(
+      businessId : RoleInterface['businessId'],
+     @Body() options : {
+        roleId: RolePermissionInterface['roleId'],
+        permissions: RolePermissionInterface['permissionId'] | RolePermissionInterface['permissionId'][]
+      }
+  ): Promise<Array<RolePermissionInterface>> {
+    try {
+      return await roleService.syncRoleWithPermissions(businessId,options);
+    } catch (err) {
+      this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }
   }

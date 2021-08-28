@@ -203,6 +203,9 @@ const migrationCommands = [
           'primaryKey': true,
           'type': Sequelize.INTEGER
         },
+        'platformId': {
+          'type': Sequelize.INTEGER
+        },
         'title': {
           'type': Sequelize.STRING
         },

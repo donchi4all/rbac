@@ -10,7 +10,7 @@ export class RoleErrorHandler extends ErrorHandler {
     return {
       status: 400,
       code: 'NOT_EXIST',
-      message: 'Permissions does not exist.',
+      message: 'Role does not exist.',
     };
   }
 

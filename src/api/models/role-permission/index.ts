@@ -1,5 +1,16 @@
-import { Table, AutoIncrement, PrimaryKey, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  AutoIncrement,
+  PrimaryKey,
+  Column,
+  Model,
+  DataType,
+  HasMany,
+  AllowNull,
+  ForeignKey
+} from 'sequelize-typescript';
 import { RolePermissionInterface } from './IRolePermission';
+import {Permission, Role} from '../index';
 
 @Table({
   tableName: 'rolePermission',
@@ -12,8 +23,19 @@ export class RolePermission extends Model<RolePermissionInterface> {
   @Column(DataType.INTEGER)
   id: RolePermissionInterface['id'];
 
+  @HasMany(() => Role, {
+    sourceKey: 'permissionId',
+    foreignKey: 'permissionId',
+  })
+  permissions: Permission[];
+
+
+  @AllowNull(false)
   @Column(DataType.INTEGER)
+  @ForeignKey(() => Role)
   roleId: RolePermissionInterface['roleId'];
+
+
 
   @Column(DataType.INTEGER)
   permissionId: RolePermissionInterface['permissionId'];
