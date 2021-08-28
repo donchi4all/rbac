@@ -10,11 +10,12 @@ import {
   AllowNull,
   Default,
   Unique,
-  BelongsTo,
+  BelongsTo, HasMany,
 } from 'sequelize-typescript';
 import { BusinessInterface } from './IBusiness';
 import { StringsFormating as Str } from '../../../utils';
 import { Platform } from '../platform';
+import {BusinessUserRole, Role} from '../index';
 
 @Table({
   tableName: 'business',
@@ -47,6 +48,10 @@ export class Business extends Model<BusinessInterface> {
     onDelete: 'CASCADE',
   })
   platform: Platform;
+
+
+  @HasMany(() => BusinessUserRole)
+  businessUsers: BusinessUserRole[];
 
   @AllowNull
   @Column(DataType.STRING)

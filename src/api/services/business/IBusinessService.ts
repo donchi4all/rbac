@@ -3,6 +3,11 @@ import {
   BusinessInterface,
 } from '../../models/business/IBusiness';
 import { PlatformInterface } from '../../models/platform/IPlatform';
+import {
+  BusinessUserRoleCreationType,
+  BusinessUserRoleInterface,
+} from '../../models/business-user-role/IBusinessUserRole';
+import { BusinessUserRole } from '../../models';
 
 export interface IBusinessService {
   /**
@@ -54,4 +59,39 @@ export interface IBusinessService {
     slug: BusinessInterface['slug'],
     platformSlug: PlatformInterface['slug']
   ): Promise<BusinessInterface>;
+
+  /**
+   * Get Business Roles and Permission
+   * @param platformSlug
+   * @param _slug
+   */
+  getBusinessWithRoleAndPermissions(
+    platformSlug: PlatformInterface['slug'],
+    _slug: BusinessInterface['slug']
+  ): Promise<Array<BusinessInterface>>;
+
+  /**
+   * Assign role with Business User
+   *
+   * @param platformSlug
+   * @param _slug
+   * @param businessUserRoleData
+   */
+  assignRoleToBusinessUser(
+    platformSlug: PlatformInterface['slug'],
+    businessUserRoleData: BusinessUserRoleCreationType
+  ): Promise<BusinessUserRoleInterface>;
+
+  /**
+   * Finds an existing business user record
+   *
+   * @param businessId
+   * @param userId
+   * @param roleId
+   */
+  findBusinessUserRole(
+    businessId: BusinessUserRoleInterface['businessId'],
+    userId: BusinessUserRoleInterface['userId'],
+    roleId: BusinessUserRoleInterface['roleId']
+  ): Promise<BusinessUserRole>;
 }

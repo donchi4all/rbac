@@ -1,5 +1,17 @@
-import { Table, AutoIncrement, PrimaryKey, Column, Model, DataType, UpdatedAt, CreatedAt } from 'sequelize-typescript';
+import {
+  Table,
+  AutoIncrement,
+  PrimaryKey,
+  Column,
+  Model,
+  DataType,
+  UpdatedAt,
+  CreatedAt,
+  BelongsTo, HasMany, ForeignKey, AllowNull
+} from 'sequelize-typescript';
 import { BusinessUserRoleInterface, BusinessUserRoleStatus } from './IBusinessUserRole';
+import {Business} from '../business';
+import {Role} from '../role';
 
 @Table({
   tableName: 'BusinessUserRole'
@@ -13,10 +25,30 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
   @Column(DataType.STRING)
   userId: BusinessUserRoleInterface['userId'];
 
-  @Column(DataType.STRING)
+  @BelongsTo(() => Business, {
+    foreignKey: 'businessId',
+    foreignKeyConstraint: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  business: Business;
+
+
+  @HasMany(() => Role, {
+    sourceKey: 'businessId',
+    foreignKey: 'businessId',
+  })
+  roles: Role[];
+
+
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
+  @ForeignKey(() => Business)
   businessId: BusinessUserRoleInterface['businessId'];
 
+  @AllowNull(false)
   @Column(DataType.INTEGER)
+  @ForeignKey(() => Role)
   roleId: BusinessUserRoleInterface['roleId'];
 
   @Column(DataType.ENUM(...Object.values(BusinessUserRoleStatus)))

@@ -34,6 +34,11 @@ class PlatformService implements IPlatformService {
         );
       }
 
+      if(!platform.isActive){
+        return Promise.reject(
+            new PlatformErrorHandler(PlatformErrorHandler.Forbidden)
+        );
+      }
       return platform;
     } catch (err) {
       throw new PlatformErrorHandler(CommonErrorHandler.Fatal);
