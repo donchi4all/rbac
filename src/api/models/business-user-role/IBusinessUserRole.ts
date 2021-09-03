@@ -1,11 +1,11 @@
 export interface BusinessUserRoleInterface {
-  id: number;
+  id?: number;
   userId: string;
   businessId: string;
   roleId: number;
   status: `${BusinessUserRoleStatus}`;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum BusinessUserRoleStatus {

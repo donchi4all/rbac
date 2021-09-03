@@ -1,7 +1,7 @@
 import { ErrorInterface } from './IError';
 import { ErrorHandler } from './ErrorHandler';
 
-export class BusinessErrorHandler extends ErrorHandler {
+export class BusinessUserRoleErrorHandler extends ErrorHandler {
   constructor(err: ErrorInterface) {
     super(err);
   }
@@ -10,7 +10,7 @@ export class BusinessErrorHandler extends ErrorHandler {
     return {
       status: 400,
       code: 'NOT_EXIST',
-      message: 'Business does not exist',
+      message: 'User with this role does not exist',
     };
   }
 
@@ -18,7 +18,7 @@ export class BusinessErrorHandler extends ErrorHandler {
     return {
       status: 400,
       code: 'ALREADY_EXIST',
-      message: 'Business already exists',
+      message: 'User already have this role',
     };
   }
 
@@ -26,7 +26,7 @@ export class BusinessErrorHandler extends ErrorHandler {
     return {
       status: 403,
       code: 'FORBIDDEN',
-      message: 'Access to that business is forbidden',
+      message: 'User Access to this role is forbidden',
     };
   }
 
