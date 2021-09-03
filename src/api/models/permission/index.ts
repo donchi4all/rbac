@@ -10,7 +10,7 @@ export class Permission extends Model<PermissionInterface, PermissionCreationTyp
   @Column(DataType.INTEGER)
   id: PermissionInterface['id'];
 
-  @Column(DataType.STRING)
+  @Column(DataType.INTEGER)
   platformId: PermissionInterface['platformId'];
 
   @Column(DataType.STRING)

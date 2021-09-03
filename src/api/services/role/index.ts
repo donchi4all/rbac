@@ -1,20 +1,20 @@
-import { Op } from 'sequelize';
-import { Role } from '../../models';
-import {
-  RoleInterface,
-  RoleCreationType, 
-  RoleEditRequestType, 
-  RoleCreationRequestType
-} from '../../models/role/IRole';
-import { IRoleService } from './IRoleService';
-import { RoleErrorHandler } from '../../../modules/exceptions';
+import {Op} from 'sequelize';
+import {Business, Role, RolePermission} from '../../models';
+import {RoleCreationRequestType, RoleCreationType, RoleEditRequestType, RoleInterface} from '../../models/role/IRole';
+import {IRoleService} from './IRoleService';
+import {CommonErrorHandler, RoleErrorHandler, RolePermissionErrorHandler} from '../../../modules/exceptions';
+import {RolePermissionInterface} from '../../models/role-permission/IRolePermission';
+import businessService from '../business';
+import permissionService from '../permission';
+
+export { RolePermissionInterface };
 
 class RoleService implements IRoleService {
   /**
    * Creates a new role
-   * 
-   * @param payload 
-   * @returns 
+   *
+   * @param payload
+   * @returns
    */
   public async createRole (
     payload: RoleCreationRequestType|RoleCreationRequestType[]
@@ -30,7 +30,7 @@ class RoleService implements IRoleService {
           return await Role.create({ ...payload, title, slug });
         })
       )
-      
+
       return role;
     } catch (err) {
       throw err;
@@ -39,10 +39,10 @@ class RoleService implements IRoleService {
 
   /**
    * Sudo Implementation for model findOrCreate (WIP)
-   * 
-   * @param searchParams 
-   * @param payload 
-   * @returns 
+   *
+   * @param searchParams
+   * @param payload
+   * @returns
    */
   public async findOrCreate(
     searchParams: Array<string>, payload: RoleCreationType
@@ -156,6 +156,91 @@ class RoleService implements IRoleService {
     } catch (err) {
       throw err;
     }
+  }
+
+  /**
+   * Find Role By ID
+   *
+   * @param businessId
+   * @param roleId
+   * @param rejectIfNotFound
+   */
+  async findRoleById(businessId: RoleInterface['businessId'], roleId: RoleInterface['id'], rejectIfNotFound: boolean = true ): Promise<Role> {
+    try {
+      const role = await Role.findOne({
+        where: {
+          id : roleId,
+          businessId : businessId
+        },
+       include: [Business]
+      });
+
+      if (!role && rejectIfNotFound) {
+        return Promise.reject( new RoleErrorHandler(RoleErrorHandler.RoleDoNotExist)
+        );
+      }
+      return role;
+    }catch (e) {
+      throw new RoleErrorHandler(CommonErrorHandler.Fatal);
+    }
+  }
+
+  /**
+   * Sync Role with permission
+   *
+   * @param businessId
+   * @param options
+   */
+  public async syncRoleWithPermissions(
+      businessId : RoleInterface['businessId'],
+      options : {
+        roleId: RolePermissionInterface['roleId'],
+        permissions: RolePermissionInterface['permissionId'] | RolePermissionInterface['permissionId'][]
+      }
+  ): Promise<Array<RolePermissionInterface>>{
+
+    // eslint-disable-next-line prefer-const
+    let {  roleId, permissions } = options;
+    const role = await this.findRoleById( businessId, roleId );
+    const { platformId } = await businessService.findBusinessById(role.business.platformId,businessId);
+
+    if (!Array.isArray(permissions)) {
+      permissions = [permissions];
+    }
+
+    return Promise.all(
+        permissions.map(async (permissionId) => {
+          //check if permission exist in the platform
+          await permissionService.findPermissionById(platformId, permissionId);
+          //check if role & permission exist
+          const rolePermission = await this.findRolePermission(roleId, permissionId, false);
+          if (rolePermission) {
+            return Promise.reject(new RolePermissionErrorHandler(RolePermissionErrorHandler.AlreadyExists));
+          }
+          return await RolePermission.create({roleId, permissionId});
+        })
+    );
+  }
+
+  /**
+   * Find Role with Permission
+   *
+   * @param roleId
+   * @param permissionId
+   * @param rejectIfNotFound
+   */
+  async findRolePermission(
+      roleId:RolePermissionInterface['roleId'],
+      permissionId: RolePermissionInterface['permissionId'],
+      rejectIfNotFound: boolean = true
+  ): Promise<RolePermission>{
+    const rolePermission = RolePermission.findOne({ where: { roleId, permissionId}});
+
+    if (!rolePermission && rejectIfNotFound) {
+      return Promise.reject( new RolePermissionErrorHandler(RolePermissionErrorHandler.DoesNotExist)
+      );
+    }
+    return rolePermission;
   }
 }
 

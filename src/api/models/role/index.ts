@@ -1,4 +1,4 @@
-import { 
+import {
   Table,
   AutoIncrement,
   PrimaryKey,
@@ -7,10 +7,11 @@ import {
   AllowNull,
   CreatedAt,
   UpdatedAt,
-  DataType
+  DataType, BelongsTo, HasMany
 } from 'sequelize-typescript';
 import { StringsFormating as Str} from '../../../utils';
 import { RoleInterface, RoleCreationType } from './IRole';
+import {Business, RolePermission} from '../index';
 
 @Table({
   tableName: 'role',
@@ -21,8 +22,18 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
   @Column(DataType.INTEGER)
   id: number;
 
-  @Column(DataType.STRING)
-  businessId: RoleInterface['businessId'];
+
+  @BelongsTo(() => Business, {
+    foreignKey: 'businessId',
+    foreignKeyConstraint: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  business: Business;
+
+  @HasMany(() => RolePermission)
+  rolePermissions: RolePermission[];
+
 
   @Column(DataType.STRING)
   title: RoleInterface['title'];

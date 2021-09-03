@@ -10,13 +10,13 @@ import {
   SuccessResponse,
 } from 'tsoa';
 
-import { Permission } from '../../../api/models';
 import httpStatuses from '../../httpStatuses';
-import permissionService from '../../services/permission';
+import permissionService, {
+  Permission,
+  PermissionCreationRequestType,
+  PermissionEditRequestType,
+} from '../../services/permission';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
-import { PermissionEditRequestType } from '../../../api/models/permission/IPermission';
-import { PermissionCreationRequestType } from '../../../api/models/permission/IPermission';
-
 
 @Route('{platform}/permission')
 export class permissionController extends Controller {
@@ -28,14 +28,15 @@ export class permissionController extends Controller {
 
   /**
    * Permission Creation endpoint
-   * 
-   * @param requestBody 
-   * @returns 
+   *
+   * @param requestBody
+   * @returns
    */
   @Post('/')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async createPermission(
-    @Body() requestBody: PermissionCreationRequestType|PermissionCreationRequestType[]
+    @Body()
+    requestBody: PermissionCreationRequestType | PermissionCreationRequestType[]
   ): Promise<Permission[]> {
     try {
       return permissionService.createPermission(requestBody);
@@ -61,7 +62,7 @@ export class permissionController extends Controller {
 
   @Get('/')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async listPermissions( platform: string ): Promise<Array<Permission>> {
+  public async listPermissions(platform: number): Promise<Array<Permission>> {
     try {
       return permissionService.listPermissions(platform);
     } catch (err) {
@@ -72,18 +73,23 @@ export class permissionController extends Controller {
 
   @Get('{permissionIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async findPermission ( permissionIdentifier: string ): Promise<Permission> {
-    try{
+  public async findPermission(
+    permissionIdentifier: string
+  ): Promise<Permission> {
+    try {
       return await permissionService.findPermission(permissionIdentifier);
     } catch (err) {
-      this.log.error(`Failed to find beneficiary with permissionIdentifier: ${permissionIdentifier}`, err);
+      this.log.error(
+        `Failed to find beneficiary with permissionIdentifier: ${permissionIdentifier}`,
+        err
+      );
       throw err;
     }
   }
 
   @Delete('/{permission}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async deletePermission( permission: string): Promise<void> {
+  public async deletePermission(permission: string): Promise<void> {
     try {
       return permissionService.deletePermission(permission);
     } catch (err) {

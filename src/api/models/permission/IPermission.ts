@@ -1,6 +1,6 @@
 export interface PermissionInterface {
   id: number;
-  platformId: string;
+  platformId: number;
   title: string;
   slug: string;
   description?: string;

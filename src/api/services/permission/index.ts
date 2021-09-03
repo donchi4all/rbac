@@ -1,13 +1,13 @@
 import { Op } from 'sequelize';
-import { Permission } from '../../models';
+import {Permission} from '../../models';
 import { 
   PermissionCreationRequestType, 
   PermissionEditRequestType, 
   PermissionInterface 
 } from '../../models/permission/IPermission';
 import { IPermissionService } from './IPermissionService';
-import { PermissionErrorHandler } from '../../../modules/exceptions';
-
+import {CommonErrorHandler, PermissionErrorHandler} from '../../../modules/exceptions';
+export { PermissionCreationRequestType, PermissionEditRequestType, Permission};
 class PermissionService implements IPermissionService {
 
   /**
@@ -71,7 +71,7 @@ class PermissionService implements IPermissionService {
    * 
    * @returns 
    */
-  public async listPermissions (platformId: string ): Promise<Array<Permission>> {
+  public async listPermissions (platformId: number): Promise<Array<Permission>> {
     try {
       return await Permission.findAll({
         // where: { platformId }
@@ -122,6 +122,37 @@ class PermissionService implements IPermissionService {
       return;
     } catch (err) {
       throw err;
+    }
+  }
+
+  /**
+   * Find Permission By ID
+   *
+   * @param platformId
+   * @param permissionId
+   * @param rejectIfNotFound
+   */
+  public async findPermissionById (
+      platformId: PermissionInterface['platformId'],
+      permissionId: PermissionInterface['id'],
+      rejectIfNotFound: boolean= true
+  ): Promise<
+      Permission>{
+    try {
+      const permission = await Permission.findOne({
+        where: {
+          id : permissionId,
+          platformId : platformId
+        }
+      });
+
+      if (!permission && rejectIfNotFound) {
+        return Promise.reject( new PermissionErrorHandler(PermissionErrorHandler.PermissionDoNotExist)
+        );
+      }
+      return permission;
+    }catch (e) {
+      throw new PermissionErrorHandler(CommonErrorHandler.Fatal);
     }
   }
 }
