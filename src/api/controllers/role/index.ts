@@ -7,7 +7,7 @@ import {
   Hidden,
   Delete,
   Controller,
-  SuccessResponse,
+  SuccessResponse, Tags,
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
@@ -18,6 +18,7 @@ import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 
 
 @Route('{business}/role')
+@Tags('Role')
 export class roleController extends Controller {
   /**
    * Initialize logger

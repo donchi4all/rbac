@@ -7,7 +7,7 @@ import {
   Hidden,
   Delete,
   Controller,
-  SuccessResponse,
+  SuccessResponse, Tags,
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
@@ -19,6 +19,7 @@ import permissionService, {
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 
 @Route('{platform}/permission')
+@Tags('Permission')
 export class permissionController extends Controller {
   /**
    * Initialize logger

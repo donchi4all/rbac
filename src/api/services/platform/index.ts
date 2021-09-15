@@ -34,7 +34,7 @@ class PlatformService implements IPlatformService {
         );
       }
 
-      if(!platform.isActive){
+      if(platform && !platform.isActive){
         return Promise.reject(
             new PlatformErrorHandler(PlatformErrorHandler.Forbidden)
         );

@@ -6,7 +6,7 @@ import {
   Post,
   Body,
   Patch,
-  Delete,
+  Delete, Tags,
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
@@ -20,6 +20,7 @@ import businessService, {
 import { BusinessUserRoleInterface } from '../../models/business-user-role/IBusinessUserRole';
 
 @Route('platform')
+@Tags('Business')
 export class BusinessController extends Controller {
   //#region FIELDS
   @LoggerDecorator('Controller.platform')
