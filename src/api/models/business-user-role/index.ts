@@ -35,8 +35,8 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
 
 
   @HasMany(() => Role, {
-    sourceKey: 'businessId',
-    foreignKey: 'businessId',
+    sourceKey: 'roleId',
+    foreignKey: 'roleId',
   })
   roles: Role[];
 

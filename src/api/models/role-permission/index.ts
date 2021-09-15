@@ -23,11 +23,12 @@ export class RolePermission extends Model<RolePermissionInterface> {
   @Column(DataType.INTEGER)
   id: RolePermissionInterface['id'];
 
-  @HasMany(() => Role, {
+  @HasMany(() => Permission, {
     sourceKey: 'permissionId',
     foreignKey: 'permissionId',
   })
   permissions: Permission[];
+
 
 
   @AllowNull(false)
@@ -37,6 +38,8 @@ export class RolePermission extends Model<RolePermissionInterface> {
 
 
 
+  @AllowNull(false)
   @Column(DataType.INTEGER)
+  @ForeignKey(() => Permission)
   permissionId: RolePermissionInterface['permissionId'];
 }

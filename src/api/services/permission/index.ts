@@ -145,7 +145,6 @@ class PermissionService implements IPermissionService {
           platformId : platformId
         }
       });
-
       if (!permission && rejectIfNotFound) {
         return Promise.reject( new PermissionErrorHandler(PermissionErrorHandler.PermissionDoNotExist)
         );

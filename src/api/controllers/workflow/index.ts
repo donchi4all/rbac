@@ -7,7 +7,7 @@ import {
   Hidden,
   Delete,
   Controller,
-  SuccessResponse,
+  SuccessResponse, Tags,
 } from 'tsoa';
 
 import { Workflow } from '../../../api/models';
@@ -18,6 +18,7 @@ import { WorkflowCreationRequestType } from '../../../api/models/workflow/IWorkf
 
 
 @Route('{business}/workflow')
+@Tags('Workflow')
 export class workflowController extends Controller {
   /**
    * Initialize logger

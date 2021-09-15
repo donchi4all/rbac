@@ -241,7 +241,6 @@ class BusinessService implements IBusinessService {
   ): Promise<BusinessUserRoleInterface> {
     const platform = await platformService.findPlatform(platformSlug);
     const { userId, roleId, businessId } = businessUserRoleData;
-
     const business = await this.findBusinessById(platform.id, businessId);
 
     //check if this role belong to this business

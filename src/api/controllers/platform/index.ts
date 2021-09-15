@@ -6,7 +6,7 @@ import {
   Post,
   Body,
   Patch,
-  Delete,
+  Delete, Tags,
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
@@ -17,6 +17,7 @@ import platformService, {
 } from '../../services/platform';
 
 @Route('platform')
+@Tags('Platform')
 export class PlatformController extends Controller {
   //#region FIELDS
   @LoggerDecorator('Controller.platform')
