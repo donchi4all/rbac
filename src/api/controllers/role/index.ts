@@ -4,20 +4,24 @@ import {
   Body,
   Post,
   Route,
-  Hidden,
   Delete,
   Controller,
-  SuccessResponse, Tags,
+  SuccessResponse,
+  Tags,
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
-import roleService, {RolePermissionInterface} from '../../services/role';
+import roleService, { RolePermissionInterface } from '../../services/role';
 import { Role } from '../../../api/models';
-import {RoleCreationRequestType, RoleInterface} from '../../../api/models/role/IRole';
+import {
+  RoleCreationRequestType,
+  RoleInterface,
+} from '../../../api/models/role/IRole';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
+import { BusinessUserRoleCreationType } from '../../models/business-user-role/IBusinessUserRole';
+import { RolePermissionCreationType } from '../../models/role-permission/IRolePermission';
 
-
-@Route('{business}/role')
+@Route('role')
 @Tags('Role')
 export class roleController extends Controller {
   /**
@@ -28,9 +32,9 @@ export class roleController extends Controller {
 
   /**
    * Role Creation endpoint
-   * 
-   * @param requestBody 
-   * @returns 
+   *
+   * @param requestBody
+   * @returns
    */
   @Post('/')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
@@ -58,7 +62,7 @@ export class roleController extends Controller {
     }
   }
 
-  @Get('/')
+  @Get('/{business}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listRoles(business: string): Promise<Role[]> {
     try {
@@ -71,8 +75,8 @@ export class roleController extends Controller {
 
   @Get('{roleIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async findRole ( roleIdentifier: string ): Promise<Role> {
-    try{
+  public async findRole(roleIdentifier: string): Promise<Role> {
+    try {
       return await roleService.findRole(roleIdentifier);
     } catch (err) {
       this.log.error(`Failed to find role with id: ${roleIdentifier}`, err);
@@ -94,14 +98,43 @@ export class roleController extends Controller {
   @Post('/{businessId}/sync/permissions')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async syncRoleWithPermissions(
-      businessId : RoleInterface['businessId'],
-     @Body() options : {
-        roleId: RolePermissionInterface['roleId'],
-        permissions: RolePermissionInterface['permissionId'] | RolePermissionInterface['permissionId'][]
-      }
+    businessId: RoleInterface['businessId'],
+    @Body()
+    options: {
+      roleId: RolePermissionInterface['roleId'];
+      permissions:
+        | RolePermissionInterface['permissionId']
+        | RolePermissionInterface['permissionId'][];
+    }
   ): Promise<Array<RolePermissionInterface>> {
     try {
-      return await roleService.syncRoleWithPermissions(businessId,options);
+      return await roleService.syncRoleWithPermissions(businessId, options);
+    } catch (err) {
+      this.log.error(`Route /role POST with err: ${err}`);
+      throw err;
+    }
+  }
+
+  @Post('/business/user-has-role')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async businessUserHasRole(
+    @Body() payload: BusinessUserRoleCreationType
+  ): Promise<boolean> {
+    try {
+      return roleService.businessUserHasRole(payload);
+    } catch (err) {
+      this.log.error(`Route /role POST with err: ${err}`);
+      throw err;
+    }
+  }
+
+  @Post('/has-permission')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async roleHasPermission(
+    @Body() payload: RolePermissionCreationType
+  ): Promise<boolean> {
+    try {
+      return roleService.roleHasPermission(payload);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;

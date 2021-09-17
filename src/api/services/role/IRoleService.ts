@@ -1,65 +1,77 @@
-import { Role } from "../../models";
-import { 
-    RoleInterface,
-    RoleCreationType,
-    RoleEditRequestType,
-    RoleCreationRequestType
-} from "../../models/role/IRole";
+import { Role } from '../../models';
+import {
+  RoleInterface,
+  RoleCreationType,
+  RoleEditRequestType,
+  RoleCreationRequestType,
+} from '../../models/role/IRole';
+import { BusinessUserRoleCreationType } from '../../models/business-user-role/IBusinessUserRole';
+import { RolePermissionCreationType } from '../../models/role-permission/IRolePermission';
 
 export interface IRoleService {
-    /**
-     * Creates a new role
-     * 
-     * @param payload 
-     * @returns 
-     */
-    createRole (
-        payload: RoleCreationRequestType|RoleCreationRequestType[]
-    ):  Promise<Array<Role>>
+  /**
+   * Creates a new role
+   *
+   * @param payload
+   * @returns
+   */
+  createRole(
+    payload: RoleCreationRequestType | RoleCreationRequestType[]
+  ): Promise<Array<Role>>;
 
-    /**
-     * Sudo Implementation for model findOrCreate (WIP)
-     * 
-     * @param searchParams 
-     * @param payload 
-     * @returns 
-     */
-    findOrCreate? (
-        searchParams: Array<string>, payload: RoleCreationType
-    ):  Promise<Role>
+  /**
+   * Sudo Implementation for model findOrCreate (WIP)
+   *
+   * @param searchParams
+   * @param payload
+   * @returns
+   */
+  findOrCreate?(
+    searchParams: Array<string>,
+    payload: RoleCreationType
+  ): Promise<Role>;
 
-    /**
-     * Update an existing worklfow
-     * 
-     * @param roleId 
-     * @param payload 
-     * @returns 
-     */
-    updateRole (
-        roleId: string, 
-        payload: RoleEditRequestType
-    ):  Promise<Role>
+  /**
+   * Update an existing worklfow
+   *
+   * @param roleId
+   * @param payload
+   * @returns
+   */
+  updateRole(roleId: string, payload: RoleEditRequestType): Promise<Role>;
 
-    /**
-     * Fetch list of roles
-     * 
-     * @returns 
-     */
-    listRoles (businessId: RoleInterface['businessId']): Promise<Array<Role>>
+  /**
+   * Fetch list of roles
+   *
+   * @returns
+   */
+  listRoles(businessId: RoleInterface['businessId']): Promise<Array<Role>>;
 
-    /**
-     * Find an existing role
-     * 
-     * @param identifier 
-     * @returns 
-     */
-    findRole (identifier: string): Promise<Role>
+  /**
+   * Find an existing role
+   *
+   * @param identifier
+   * @returns
+   */
+  findRole(identifier: string): Promise<Role>;
 
-    /**
-     * Delete an existing role
-     * 
-     * @param roleId 
-     * @returns 
-     */
-    deleteRole (roleId: string): Promise<void>
+  /**
+   * Delete an existing role
+   *
+   * @param roleId
+   * @returns
+   */
+  deleteRole(roleId: string): Promise<void>;
+
+  /**
+   * Business User Role Checker
+   * @param payload
+   */
+  businessUserHasRole(payload: BusinessUserRoleCreationType): Promise<boolean>;
+
+  /**
+   * Role has Permission Checker
+   * @param payload
+   */
+  roleHasPermission(payload: RolePermissionCreationType): Promise<boolean>;
 }
