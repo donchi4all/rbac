@@ -7,14 +7,22 @@ import {
   DataType,
   UpdatedAt,
   CreatedAt,
-  BelongsTo, HasMany, ForeignKey, AllowNull
+  BelongsTo,
+  HasMany,
+  ForeignKey,
+  AllowNull,
+  BelongsToMany,
 } from 'sequelize-typescript';
-import { BusinessUserRoleInterface, BusinessUserRoleStatus } from './IBusinessUserRole';
-import {Business} from '../business';
-import {Role} from '../role';
+import {
+  BusinessUserRoleInterface,
+  BusinessUserRoleStatus,
+} from './IBusinessUserRole';
+import { Business } from '../business';
+import { Role } from '../role';
+import { Permission, RolePermission } from '../index';
 
 @Table({
-  tableName: 'BusinessUserRole'
+  tableName: 'BusinessUserRole',
 })
 export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
   @PrimaryKey
@@ -33,13 +41,17 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
   })
   business: Business;
 
-
-  @HasMany(() => Role, {
-    sourceKey: 'roleId',
-    foreignKey: 'roleId',
-  })
+  @HasMany(() => Role, 'id')
   roles: Role[];
 
+  @BelongsToMany(() => Permission, {
+    through: {
+      model: () => RolePermission,
+    },
+    foreignKey: 'roleId',
+    foreignKeyConstraint: false,
+  })
+  permissions: Permission[];
 
   @AllowNull(false)
   @Column(DataType.INTEGER)
@@ -60,7 +72,6 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
     defaultValue: DataType.NOW,
   })
   createdAt: BusinessUserRoleInterface['createdAt'];
-
 
   @UpdatedAt
   @Column({

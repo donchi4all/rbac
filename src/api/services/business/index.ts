@@ -8,6 +8,7 @@ import roleService from '../../services/Role';
 import {
   Business,
   BusinessUserRole,
+  Permission,
   Platform,
   Role,
   RolePermission,
@@ -23,12 +24,23 @@ import {
   BusinessUserRoleInterface,
   BusinessUserRoleStatus,
 } from '../../models/business-user-role/IBusinessUserRole';
+import { PermissionInterface } from '../../models/permission/IPermission';
 
 export {
   BusinessInterface,
   PlatformInterface,
   BusinessCreationType,
   BusinessUserRoleCreationType,
+};
+export type UserHasPermissionRequest = {
+  businessId: BusinessUserRoleInterface['businessId'];
+  userId: BusinessUserRoleInterface['userId'];
+  permissionId: PermissionInterface['id'] | PermissionInterface['id'][];
+};
+
+export type UserRoleResponse = {
+  userId: BusinessUserRoleInterface['userId'];
+  roles: Record<string, Record<string, any>>;
 };
 
 class BusinessService implements IBusinessService {
@@ -221,7 +233,23 @@ class BusinessService implements IBusinessService {
             {
               model: Role,
               attributes: ['title', 'slug', 'isActive', 'description'],
-              include: [RolePermission],
+              include: [
+                {
+                  model: RolePermission,
+                  attributes: ['id'],
+                  include: [
+                    {
+                      model: Permission,
+                      attributes: [
+                        'title',
+                        'isActive',
+                        'description',
+                        'createdAt',
+                      ],
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -305,6 +333,102 @@ class BusinessService implements IBusinessService {
       );
     }
     return businessUserRole;
+  }
+
+  /**
+   * Get business user role and permission
+   * @param businessId
+   * @param userId
+   * @param rejectIfNotFound
+   */
+  public async getBusinessUserRole(
+    businessId: BusinessUserRoleInterface['businessId'],
+    userId: BusinessUserRoleInterface['userId'],
+    rejectIfNotFound: boolean = true
+  ): Promise<UserRoleResponse> {
+    const businessUserRole = await BusinessUserRole.findAll({
+      where: { businessId, userId },
+      include: [
+        {
+          model: Role,
+          attributes: ['title', 'slug', 'isActive', 'description'],
+          include: [
+            {
+              model: RolePermission,
+              attributes: ['id'],
+              include: [
+                {
+                  model: Permission,
+                  attributes: ['title', 'isActive', 'description', 'createdAt'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!businessUserRole && rejectIfNotFound) {
+      return Promise.reject(
+        new BusinessUserRoleErrorHandler(
+          BusinessUserRoleErrorHandler.DoesNotExist
+        )
+      );
+    }
+
+    const roles = businessUserRole.reduce(
+      (
+        result: Record<string, Record<string, any>>,
+        privilege: BusinessUserRole
+      ) => {
+        privilege.roles.map((role) => {
+          const _role = role.title;
+          const permissions: unknown[] = [];
+          role.rolePermissions.map((rolePermission) => {
+            rolePermission.permissions.map((_permission) => {
+              permissions.push(...[_permission]);
+            });
+          });
+
+          if (!result[_role]) {
+            result[_role] = { permissions };
+          } else {
+            result[_role] = {
+              ...result[_role],
+              permissions,
+            };
+          }
+        });
+        return result;
+      },
+      {}
+    );
+    return {
+      userId: userId,
+      roles,
+    };
+  }
+
+  /**
+   *  Get user with it's permissions
+   * @param userId
+   * @param permission
+   */
+  public async userPermissions(
+    userId: BusinessUserRoleInterface['userId'],
+    permission: string
+  ): Promise<boolean> {
+    const userPermissions = await BusinessUserRole.findOne({
+      where: { userId: userId },
+      include: [
+        {
+          model: Permission,
+          where: { title: permission },
+        },
+      ],
+    });
+
+    return (userPermissions && true) || false;
   }
 }
 

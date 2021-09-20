@@ -8,6 +8,7 @@ import {
   BusinessUserRoleInterface,
 } from '../../models/business-user-role/IBusinessUserRole';
 import { BusinessUserRole } from '../../models';
+import { UserRoleResponse } from './index';
 
 export interface IBusinessService {
   /**
@@ -94,4 +95,26 @@ export interface IBusinessService {
     userId: BusinessUserRoleInterface['userId'],
     roleId: BusinessUserRoleInterface['roleId']
   ): Promise<BusinessUserRole>;
+
+  /**
+   * Get business user role and permission
+   * @param businessId
+   * @param userId
+   * @param rejectIfNotFound
+   */
+  getBusinessUserRole(
+    businessId: BusinessUserRoleInterface['businessId'],
+    userId: BusinessUserRoleInterface['userId'],
+    rejectIfNotFound: boolean
+  ): Promise<UserRoleResponse>;
+
+  /**
+   * Get business user with it's permissions
+   * @param userId
+   * @param permission
+   */
+  userPermissions(
+    userId: BusinessUserRoleInterface['userId'],
+    permission: string
+  ): Promise<boolean>;
 }

@@ -6,7 +6,8 @@ import {
   Post,
   Body,
   Patch,
-  Delete, Tags,
+  Delete,
+  Tags,
 } from 'tsoa';
 
 import httpStatuses from '../../httpStatuses';
@@ -16,6 +17,7 @@ import businessService, {
   BusinessInterface,
   BusinessUserRoleCreationType,
   PlatformInterface,
+  UserRoleResponse,
 } from '../../services/business';
 import { BusinessUserRoleInterface } from '../../models/business-user-role/IBusinessUserRole';
 
@@ -157,6 +159,44 @@ export class BusinessController extends Controller {
     } catch (err) {
       this.log.error(
         `Route /${platformSlug}/business/${businessSlug}/users Get with err: ${err}`
+      );
+      throw err;
+    }
+  }
+
+  @Get('business/{businessId}/users/{userId}')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async getBusinessUserRole(
+    businessId: BusinessUserRoleInterface['businessId'],
+    userId: BusinessUserRoleInterface['userId']
+  ): Promise<UserRoleResponse> {
+    try {
+      this.log.info(
+        `Route business/${businessId}/users/${userId} Get business users and it's role`
+      );
+      return businessService.getBusinessUserRole(businessId, userId);
+    } catch (err) {
+      this.log.error(
+        `Route business/${businessId}/users/${userId} Get with err: ${err}`
+      );
+      throw err;
+    }
+  }
+
+  @Get('business/users/{userId}/{permission}')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async getUserWithPermissions(
+    userId: BusinessUserRoleInterface['userId'],
+    permission: string
+  ): Promise<boolean> {
+    try {
+      this.log.info(
+        `Route business/users/${userId}/${permission} Get business users and it's role`
+      );
+      return businessService.userPermissions(userId, permission);
+    } catch (err) {
+      this.log.error(
+        `Route business/users/${userId}/${permission} Get with err: ${err}`
       );
       throw err;
     }

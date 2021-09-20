@@ -25,7 +25,7 @@ export class RolePermission extends Model<RolePermissionInterface> {
 
   @HasMany(() => Permission, {
     sourceKey: 'permissionId',
-    foreignKey: 'permissionId',
+    foreignKey: 'id',
   })
   permissions: Permission[];
 
