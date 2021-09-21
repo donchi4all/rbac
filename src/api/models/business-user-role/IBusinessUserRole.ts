@@ -1,3 +1,5 @@
+import {Permission} from '../permission';
+
 export interface BusinessUserRoleInterface {
   id?: number;
   userId: string;
@@ -6,6 +8,7 @@ export interface BusinessUserRoleInterface {
   status: `${BusinessUserRoleStatus}`;
   createdAt?: Date;
   updatedAt?: Date;
+  permissions?:Permission[]
 }
 
 export enum BusinessUserRoleStatus {

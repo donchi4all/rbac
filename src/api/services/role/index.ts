@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Business, Role, RolePermission, BusinessUserRole } from '../../models';
+import { Business, BusinessUserRole, Role, RolePermission } from '../../models';
 import {
   RoleCreationRequestType,
   RoleCreationType,
@@ -222,12 +222,6 @@ class RoleService implements IRoleService {
     // eslint-disable-next-line prefer-const
     let { roleId, permissions } = options;
     const role = await this.findRoleById(businessId, roleId);
-
-    if (!role)
-      return Promise.reject(
-        new RoleErrorHandler(RoleErrorHandler.RoleDoNotExist)
-      );
-
     const { platformId } = await businessService.findBusinessById(
       role.business.platformId,
       businessId
@@ -315,6 +309,37 @@ class RoleService implements IRoleService {
     const rolePermission = await RolePermission.findOne({ where: payload });
     if (!rolePermission) return Promise.resolve(false);
     return Promise.resolve(true);
+  }
+
+  /**
+   * Find Role By By Property name
+   *
+   * @param businessId
+   * @param identifier
+   * @param rejectIfNotFound
+   */
+  public async findRoleByName(
+    businessId: RoleInterface['businessId'],
+    identifier: string,
+    rejectIfNotFound: boolean = true
+  ): Promise<Role> {
+    try {
+      const role = await Role.findOne({
+        where: {
+          [Op.or]: [{ slug: identifier }, { title: identifier }],
+          [Op.and]: [{ businessId }],
+        },
+      });
+
+      if (!role && rejectIfNotFound) {
+        return Promise.reject(
+          new RoleErrorHandler(RoleErrorHandler.RoleDoNotExist)
+        );
+      }
+      return role;
+    } catch (e) {
+      throw new RoleErrorHandler(CommonErrorHandler.Fatal);
+    }
   }
 }
 
