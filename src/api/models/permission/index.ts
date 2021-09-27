@@ -1,4 +1,6 @@
-import { Table, AutoIncrement, PrimaryKey, Column, Model, AllowNull, CreatedAt, UpdatedAt, DataType } from 'sequelize-typescript';
+import { Table, AutoIncrement, PrimaryKey, Column, Model, AllowNull, CreatedAt, UpdatedAt, DataType, BelongsToMany } from 'sequelize-typescript';
+
+import { Role, RolePermission } from '..';
 import { PermissionInterface, PermissionCreationType } from './IPermission';
 
 @Table({
@@ -12,6 +14,9 @@ export class Permission extends Model<PermissionInterface, PermissionCreationTyp
 
   @Column(DataType.INTEGER)
   platformId: PermissionInterface['platformId'];
+
+  @BelongsToMany(() => Role, () => RolePermission)
+  roles: Role[]
 
   @Column(DataType.STRING)
   title: PermissionInterface['title'];

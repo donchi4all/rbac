@@ -18,7 +18,7 @@ import permissionService, {
 } from '../../services/permission';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 
-@Route('{platform}/permission')
+@Route('permission')
 @Tags('Permission')
 export class permissionController extends Controller {
   /**
@@ -61,7 +61,7 @@ export class permissionController extends Controller {
     }
   }
 
-  @Get('/')
+  @Get('/platform/{platform}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listPermissions(platform: number): Promise<Array<Permission>> {
     try {
@@ -72,13 +72,13 @@ export class permissionController extends Controller {
     }
   }
 
-  @Get('{permissionIdentifier}')
+  @Get('/{permissionIdentifier}/platform/{platformId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async findPermission(
-    permissionIdentifier: string
+   platformId: number, permissionIdentifier: string
   ): Promise<Permission> {
     try {
-      return await permissionService.findPermission(permissionIdentifier);
+      return await permissionService.findPermission(platformId,permissionIdentifier);
     } catch (err) {
       this.log.error(
         `Failed to find beneficiary with permissionIdentifier: ${permissionIdentifier}`,
@@ -88,11 +88,11 @@ export class permissionController extends Controller {
     }
   }
 
-  @Delete('/{permission}')
+  @Delete('/{permission}/platform/{platformId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async deletePermission(permission: string): Promise<void> {
+  public async deletePermission(platformId: number,permission: string): Promise<void> {
     try {
-      return permissionService.deletePermission(permission);
+      return permissionService.deletePermission(platformId,permission);
     } catch (err) {
       this.log.error(`Route /permission DELETE with err: ${err}`);
       throw err;

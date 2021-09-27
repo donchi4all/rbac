@@ -49,20 +49,21 @@ export class roleController extends Controller {
     }
   }
 
-  @Put('/')
+  @Put('/{roleId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async updateRole(
+    roleId: RoleInterface['id'],
     @Body() requestBody: RoleCreationRequestType
   ): Promise<Role> {
     try {
-      return await roleService.updateRole(requestBody.title, requestBody);
+      return await roleService.updateRole(roleId, requestBody);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Get('/{business}')
+  @Get('/business/{business}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listRoles(business: string): Promise<Role[]> {
     try {
@@ -73,29 +74,57 @@ export class roleController extends Controller {
     }
   }
 
-  @Get('{roleIdentifier}')
+  @Get('{roleIdentifier}/business/{businessId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async findRole(roleIdentifier: string): Promise<Role> {
+  public async findRole(
+    businessId: RoleInterface['businessId'],
+    roleIdentifier: string
+  ): Promise<Role> {
     try {
-      return await roleService.findRole(roleIdentifier);
+      return await roleService.findRole(businessId, roleIdentifier);
     } catch (err) {
       this.log.error(`Failed to find role with id: ${roleIdentifier}`, err);
       throw err;
     }
   }
 
-  @Delete('{roleIdentifier}')
+  @Delete('{roleId}/business/{businessId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async deleteRole(roleIdentifier: string): Promise<void> {
+  public async deleteRole(
+    businessId: RoleInterface['businessId'],
+    roleId: RoleInterface['id']
+  ): Promise<void> {
     try {
-      return await roleService.deleteRole(roleIdentifier);
+      return await roleService.deleteRole(businessId, roleId);
     } catch (err) {
       this.log.error(`Route /role DELETE with err: ${err}`);
       throw err;
     }
   }
 
-  @Post('/{businessId}/sync/permissions')
+  @Post('/business/{businessId}/add/permissions')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async addRoleWithPermissions(
+    businessId: RoleInterface['businessId'],
+    @Body()
+    options: {
+      roleId: RolePermissionInterface['roleId'];
+      permissions:
+        | RolePermissionInterface['permissionId']
+        | RolePermissionInterface['permissionId'][];
+    }
+  ): Promise<Array<RolePermissionInterface>> {
+    try {
+      return await roleService.addRoleWithPermissions(businessId, options);
+    } catch (err) {
+      this.log.error(`Route /role POST with err: ${err}`);
+      throw err;
+    }
+  }
+
+
+
+  @Post('/business/{businessId}/sync/permissions')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async syncRoleWithPermissions(
     businessId: RoleInterface['businessId'],

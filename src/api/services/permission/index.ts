@@ -78,7 +78,7 @@ class PermissionService implements IPermissionService {
   public async listPermissions(platformId: number): Promise<Array<Permission>> {
     try {
       return await Permission.findAll({
-        // where: { platformId }
+        where: { platformId }
       });
     } catch (err) {
       throw err;
@@ -91,11 +91,12 @@ class PermissionService implements IPermissionService {
    * @param identifier
    * @returns
    */
-  public async findPermission(identifier: string): Promise<Permission> {
+  public async findPermission(platformId: number, identifier: string): Promise<Permission> {
     try {
       const beneficiary = await Permission.findOne({
         where: {
           [Op.or]: [{ slug: identifier }, { title: identifier }],
+          [Op.and]: [{ platformId: platformId }]
         },
       });
 
@@ -117,9 +118,9 @@ class PermissionService implements IPermissionService {
    * @param identifier
    * @returns
    */
-  public async deletePermission(identifier: string): Promise<void> {
+  public async deletePermission(platformId:number,identifier: string): Promise<void> {
     try {
-      const permission = await this.findPermission(identifier);
+      const permission = await this.findPermission(platformId,identifier);
       await permission.destroy();
 
       return;

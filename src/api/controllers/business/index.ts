@@ -17,7 +17,9 @@ import businessService, {
   BusinessInterface,
   BusinessUserRoleCreationType,
   PlatformInterface,
+  userHasPermission,
   UserRoleResponse,
+  UserRoleSyncType,
 } from '../../services/business';
 import { BusinessUserRoleInterface } from '../../models/business-user-role/IBusinessUserRole';
 
@@ -118,7 +120,7 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Post('{platformSlug}/business/sync/user-role')
+  @Post('{platformSlug}/business/add/user-role')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async assignRoleToBusinessUser(
     platformSlug: PlatformInterface['slug'],
@@ -147,7 +149,7 @@ export class BusinessController extends Controller {
   public async getBusinessWithRoleAndPermissions(
     platformSlug: PlatformInterface['slug'],
     businessSlug: BusinessInterface['slug']
-  ): Promise<Array<BusinessInterface>> {
+  ): Promise<unknown> {
     try {
       this.log.info(
         `Route /${platformSlug}/business/${businessSlug}/users Get business users and it's role`
@@ -183,21 +185,38 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Get('business/users/{userId}/{permission}')
+  @Post('business/users/has-permission')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
-  public async getUserWithPermissions(
-    userId: BusinessUserRoleInterface['userId'],
-    permission: string
+  public async userHasPermissions(
+    @Body() payload : userHasPermission
   ): Promise<boolean> {
     try {
       this.log.info(
-        `Route business/users/${userId}/${permission} Get business users and it's role`
+        'Route business/users/has-permission Get business users and its role'
       );
-      return businessService.userPermissions(userId, permission);
+      return businessService.userPermissions(payload);
     } catch (err) {
       this.log.error(
-        `Route business/users/${userId}/${permission} Get with err: ${err}`
+        `Route business/users/has-permission Get with err: ${err}`
       );
+    }
+  }
+
+  @Post('{platformSlug}/business/sync/user-role')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async syncUserWithRole(
+    platformSlug: PlatformInterface['slug'],
+    @Body() payload: UserRoleSyncType
+  ): Promise<unknown> {
+    try {
+      this.log.info(
+        `Route /business/sync/user-role Post business with data: ${JSON.stringify(
+          payload
+        )}`
+      );
+      return businessService.syncUserWithRole(platformSlug,payload);
+    } catch (err) {
+      this.log.error(`Route /business/sync/user-role Post with err: ${err}`);
       throw err;
     }
   }

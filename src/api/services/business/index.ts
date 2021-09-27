@@ -43,6 +43,16 @@ export type UserRoleResponse = {
   roles: Record<string, Record<string, any>>;
 };
 
+export type UserRoleSyncType = {
+  businessId: BusinessInterface['id'];
+  userId: BusinessUserRoleInterface['userId'];
+  roleId:
+    | BusinessUserRoleInterface['roleId']
+    | BusinessUserRoleInterface['roleId'][];
+};
+
+export type userHasPermission  = { userId: BusinessUserRoleInterface['userId'], permission: PermissionInterface['title']}
+
 class BusinessService implements IBusinessService {
   /**
    * Find business
@@ -220,9 +230,59 @@ class BusinessService implements IBusinessService {
   public async getBusinessWithRoleAndPermissions(
     platformSlug: PlatformInterface['slug'],
     _slug: BusinessInterface['slug']
-  ): Promise<Array<BusinessInterface>> {
+  ): Promise<unknown> {
     const platform = await platformService.findPlatform(platformSlug);
     const business = await this.findBusiness(platform.id, _slug);
+
+    const businessUserRole = await BusinessUserRole.findAll({
+      where: { businessId: business.id },
+      include: [
+        {
+          model: Role,
+          include: [
+            {
+              model: RolePermission,
+              attributes: ['id'],
+              include: [
+                {
+                  model: Permission,
+                  attributes: ['title', 'isActive', 'description', 'createdAt'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const userRole = businessUserRole.reduce(
+      (
+        result: Record<string, Record<string, any>>,
+        userRole: BusinessUserRole
+      ) => {
+        const role = userRole.role;
+        const permissions = role.rolePermissions.map((rolePermission) =>
+          rolePermission.permissions.map((_permission) => _permission)
+        );
+
+        if (!result[userRole.userId]) {
+          result[userRole.userId] = {
+            userId: userRole.userId,
+            [role.title]: permissions,
+          };
+        } else {
+          result[userRole.userId] = {
+            ...result[userRole.userId],
+            [role.title]: permissions,
+          };
+        }
+
+        return result;
+      },
+      {}
+    );
+
+    return { platform: platformSlug, business: _slug, userRole };
     return await Business.findAll({
       where: { id: business.id },
       include: [
@@ -381,24 +441,19 @@ class BusinessService implements IBusinessService {
         result: Record<string, Record<string, any>>,
         privilege: BusinessUserRole
       ) => {
-        privilege.roles.map((role) => {
-          const _role = role.title;
-          const permissions: unknown[] = [];
-          role.rolePermissions.map((rolePermission) => {
-            rolePermission.permissions.map((_permission) => {
-              permissions.push(...[_permission]);
-            });
-          });
-
-          if (!result[_role]) {
-            result[_role] = { permissions };
-          } else {
-            result[_role] = {
-              ...result[_role],
-              permissions,
-            };
-          }
-        });
+        const role = privilege.role;
+        const _role = role.title;
+        const permissions = role.rolePermissions.map((rolePermission) =>
+          rolePermission.permissions.map((permission) => permission)
+        );
+        if (!result[_role]) {
+          result[_role] = { permissions };
+        } else {
+          result[_role] = {
+            ...result[_role],
+            permissions,
+          };
+        }
         return result;
       },
       {}
@@ -415,9 +470,10 @@ class BusinessService implements IBusinessService {
    * @param permission
    */
   public async userPermissions(
-    userId: BusinessUserRoleInterface['userId'],
-    permission: string
+    payload : userHasPermission
   ): Promise<boolean> {
+
+   const { userId, permission } = payload;
     const userPermissions = await BusinessUserRole.findOne({
       where: { userId: userId },
       include: [
@@ -427,8 +483,37 @@ class BusinessService implements IBusinessService {
         },
       ],
     });
-
     return (userPermissions && true) || false;
+  }
+
+  public async syncUserWithRole(
+    platformSlug: PlatformInterface['slug'],
+    payload: UserRoleSyncType
+  ): Promise<unknown> {
+    const platform = await platformService.findPlatform(platformSlug);
+
+    if (!Array.isArray(payload['roleId'])) {
+      payload['roleId'] = [payload['roleId']];
+    }
+    const { businessId, userId, roleId } = payload;
+
+    try {
+      await this.findBusinessById(platform.id, businessId);
+
+      //remove all the current role a user has
+      await BusinessUserRole.destroy({ where: { businessId, userId } });
+
+      //added a new role to the user
+      const records: any[] = roleId.map((role_id) => {
+        // const role = await roleService.findRoleById(businessId, role_id,false);
+        // if(role)
+        return { userId, roleId: role_id, status: 'active', businessId };
+      });
+
+      return await BusinessUserRole.bulkCreate([...records]);
+    } catch (e) {
+      throw new BusinessUserRoleErrorHandler(CommonErrorHandler.Fatal);
+    }
   }
 }
 

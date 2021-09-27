@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { Business, BusinessUserRole, Role, RolePermission } from '../../models';
 import {
   RoleCreationRequestType,
@@ -93,7 +93,7 @@ class RoleService implements IRoleService {
    * @returns
    */
   public async updateRole(
-    roleId: string,
+    roleId: RoleInterface['id'],
     payload: RoleEditRequestType
   ): Promise<Role> {
     try {
@@ -137,11 +137,15 @@ class RoleService implements IRoleService {
    * @param identifier
    * @returns
    */
-  public async findRole(identifier: string): Promise<Role> {
+  public async findRole(
+    businessId: RoleInterface['businessId'],
+    identifier: string
+  ): Promise<Role> {
     try {
       const role = await Role.findOne({
         where: {
           [Op.or]: [{ slug: identifier }, { title: identifier }],
+          [Op.and]: [{ businessId }],
         },
       });
 
@@ -161,9 +165,12 @@ class RoleService implements IRoleService {
    * @param roleId
    * @returns
    */
-  public async deleteRole(roleId: string): Promise<void> {
+  public async deleteRole(
+    businessId: RoleInterface['businessId'],
+    roleId: RoleInterface['id']
+  ): Promise<void> {
     try {
-      const role = await this.findRole(roleId);
+      const role = await this.findRoleById(businessId, roleId);
       await role.destroy();
 
       return;
@@ -210,7 +217,7 @@ class RoleService implements IRoleService {
    * @param businessId
    * @param options
    */
-  public async syncRoleWithPermissions(
+  public async addRoleWithPermissions(
     businessId: RoleInterface['businessId'],
     options: {
       roleId: RolePermissionInterface['roleId'];
@@ -261,6 +268,23 @@ class RoleService implements IRoleService {
         return await RolePermission.create({ roleId, permissionId });
       })
     );
+  }
+
+  public async syncRoleWithPermissions(
+    businessId: RoleInterface['businessId'],
+    options: {
+      roleId: RolePermissionInterface['roleId'];
+      permissions:
+        | RolePermissionInterface['permissionId']
+        | RolePermissionInterface['permissionId'][];
+    }
+  ): Promise<Array<RolePermissionInterface>> {
+    try {
+      await RolePermission.destroy({ where: { roleId: options['roleId'] } });
+      return await this.addRoleWithPermissions(businessId, options);
+    } catch (error) {
+      throw new RoleErrorHandler(CommonErrorHandler.Fatal);
+    }
   }
 
   /**
