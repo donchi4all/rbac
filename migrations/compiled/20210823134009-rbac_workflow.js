@@ -209,6 +209,9 @@ const migrationCommands = [
         'title': {
           'type': Sequelize.STRING
         },
+        'slug': {
+          'type': Sequelize.STRING
+        },
         'description': {
           'allowNull': true,
           'type': Sequelize.STRING

@@ -1,6 +1,7 @@
 import { Table, AutoIncrement, PrimaryKey, Column, Model, AllowNull, CreatedAt, UpdatedAt, DataType, BelongsToMany } from 'sequelize-typescript';
 
 import { Role, RolePermission } from '..';
+import { StringsFormating as Str} from '../../../utils';
 import { PermissionInterface, PermissionCreationType } from './IPermission';
 
 @Table({
@@ -20,6 +21,14 @@ export class Permission extends Model<PermissionInterface, PermissionCreationTyp
 
   @Column(DataType.STRING)
   title: PermissionInterface['title'];
+
+  @Column({
+    type: DataType.STRING,
+        set (value: string): void {
+      this.setDataValue('slug', Str.toSlugCase(value));
+    }
+  })
+  slug: PermissionInterface['slug'];
 
   @AllowNull
   @Column(DataType.STRING)
