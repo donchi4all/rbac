@@ -34,7 +34,7 @@ export interface IPermissionService {
      * @returns 
      */
     listPermissions (
-        platformId: PermissionInterface['platformId']
+        platformId: string
     ):  Promise<Array<Permission>>
 
     /**

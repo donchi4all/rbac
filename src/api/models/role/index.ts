@@ -34,9 +34,14 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
   @HasMany(() => RolePermission)
   rolePermissions: RolePermission[];
 
-  @BelongsToMany(() => Permission, () => RolePermission)
-  permissions: Permission[]
-
+  @BelongsToMany(() => Permission, {
+    through: {
+      model: () => RolePermission,
+    },
+    foreignKey: 'roleId',
+    foreignKeyConstraint: false
+  })
+  permission: Permission[];
   
   @Column(DataType.STRING)
   title: RoleInterface['title'];

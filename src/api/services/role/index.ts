@@ -1,5 +1,5 @@
 import { Op, where } from 'sequelize';
-import { Business, BusinessUserRole, Role, RolePermission } from '../../models';
+import { Business, BusinessUserRole, Permission, Role, RolePermission } from '../../models';
 import {
   RoleCreationRequestType,
   RoleCreationType,
@@ -14,6 +14,7 @@ import {
   RolePermissionErrorHandler,
 } from '../../../modules/exceptions';
 import {
+  AddPermissionToRoleType,
   RolePermissionCreationType,
   RolePermissionInterface,
 } from '../../models/role-permission/IRolePermission';
@@ -30,6 +31,7 @@ class RoleService implements IRoleService {
    * @returns
    */
   public async createRole(
+    businessId: string,
     payload: RoleCreationRequestType | RoleCreationRequestType[]
   ): Promise<Array<Role>> {
     try {
@@ -37,10 +39,11 @@ class RoleService implements IRoleService {
         payload = [payload];
       }
 
+      const business = await Business.findOne({ where: {id: businessId} });
       const role = Promise.all(
         payload.map(async (payload) => {
           const [title, slug] = Array(2).fill(payload.title);
-          return await Role.create({ ...payload, title, slug });
+          return await Role.create({ ...payload, businessId: business.id, title, slug });
         })
       );
 
@@ -93,12 +96,13 @@ class RoleService implements IRoleService {
    * @returns
    */
   public async updateRole(
+    business: string,
     roleId: RoleInterface['id'],
     payload: RoleEditRequestType
   ): Promise<Role> {
     try {
       const role = await Role.findOne({
-        where: { id: roleId },
+        where: { id: roleId, businessId: business },
       });
 
       if (!role) {
@@ -139,14 +143,15 @@ class RoleService implements IRoleService {
    */
   public async findRole(
     businessId: RoleInterface['businessId'],
-    identifier: string
+    identifier: string|number
   ): Promise<Role> {
     try {
       const role = await Role.findOne({
         where: {
-          [Op.or]: [{ slug: identifier }, { title: identifier }],
+          [Op.or]: [{id: identifier}, { slug: identifier }, { title: identifier }],
           [Op.and]: [{ businessId }],
         },
+        include: Business
       });
 
       if (!role) {
@@ -218,72 +223,53 @@ class RoleService implements IRoleService {
    * @param options
    */
   public async addRoleWithPermissions(
+    platformId: string|number,
     businessId: RoleInterface['businessId'],
-    options: {
-      roleId: RolePermissionInterface['roleId'];
-      permissions:
-        | RolePermissionInterface['permissionId']
-        | RolePermissionInterface['permissionId'][];
-    }
+    options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
-    // eslint-disable-next-line prefer-const
-    let { roleId, permissions } = options;
-    const role = await this.findRoleById(businessId, roleId);
-    const { platformId } = await businessService.findBusinessById(
-      role.business.platformId,
-      businessId
-    );
+    try{
+      let { roleId, permissions } = options;
+      const role = await this.findRole(businessId, roleId);
 
-    if (!Array.isArray(permissions)) {
-      permissions = [permissions];
+      if (!Array.isArray(permissions)) {
+        permissions = [permissions];
+      }
+  
+      const permissionIds = await Permission.findAll({
+        where: {
+          [Op.or]: [{id: {[Op.in]: permissions}}],
+          [Op.or]: [{slug: {[Op.in]: permissions}}],
+          [Op.or]: [{title: {[Op.in]: permissions}}],
+          [Op.and]: [{ platformId }],
+        },
+        attributes: ['id']
+      });
+
+      const bulkInsert = permissionIds.reduce((
+        result: any,
+        permission: Permission
+      ) => {
+        result.push({roleId, permissionId: permission.id});
+        return result;
+      }, [])
+  
+      return await RolePermission.bulkCreate(bulkInsert);
     }
-
-    return Promise.all(
-      permissions.map(async (permissionId) => {
-        //check if permission exist in the platform
-        const permission = await permissionService.findPermissionById(
-          platformId,
-          permissionId,
-          false
-        );
-        if (!permission)
-          return Promise.reject(
-            new PermissionErrorHandler(
-              PermissionErrorHandler.PermissionDoNotExist
-            )
-          );
-        //check if role & permission exist
-        const rolePermission = await this.findRolePermission(
-          roleId,
-          permissionId,
-          false
-        );
-        if (rolePermission) {
-          return Promise.reject(
-            new RolePermissionErrorHandler(
-              RolePermissionErrorHandler.AlreadyExists
-            )
-          );
-        }
-        return await RolePermission.create({ roleId, permissionId });
-      })
-    );
+    catch(error){
+      throw error;
+    }
   }
 
   public async syncRoleWithPermissions(
+    platform: string|number,
     businessId: RoleInterface['businessId'],
-    options: {
-      roleId: RolePermissionInterface['roleId'];
-      permissions:
-        | RolePermissionInterface['permissionId']
-        | RolePermissionInterface['permissionId'][];
-    }
+    options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
     try {
       await RolePermission.destroy({ where: { roleId: options['roleId'] } });
-      return await this.addRoleWithPermissions(businessId, options);
+      return await this.addRoleWithPermissions(platform, businessId, options);
     } catch (error) {
-      throw new RoleErrorHandler(CommonErrorHandler.Fatal);
+      throw error;
     }
   }
 

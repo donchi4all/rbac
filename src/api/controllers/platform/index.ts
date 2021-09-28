@@ -16,7 +16,7 @@ import platformService, {
   PlatformCreationRequestType,
 } from '../../services/platform';
 
-@Route('platform')
+@Route('platforms')
 @Tags('Platform')
 export class PlatformController extends Controller {
   //#region FIELDS

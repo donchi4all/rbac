@@ -16,6 +16,7 @@ export interface IRoleService {
    * @returns
    */
   createRole(
+    business: string,
     payload: RoleCreationRequestType | RoleCreationRequestType[]
   ): Promise<Array<Role>>;
 
@@ -39,6 +40,7 @@ export interface IRoleService {
    * @returns
    */
   updateRole(
+    business: string,
     roleId: RoleInterface['id'],
     payload: RoleEditRequestType
   ): Promise<Role>;

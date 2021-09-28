@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Permission } from '../../models';
+import { Permission, Platform } from '../../models';
 import {
   PermissionCreationRequestType,
   PermissionEditRequestType,
@@ -75,10 +75,16 @@ class PermissionService implements IPermissionService {
    *
    * @returns
    */
-  public async listPermissions(platformId: number): Promise<Array<Permission>> {
+  public async listPermissions(platformSlug: string): Promise<Array<Permission>> {
     try {
+      const platform = await Platform.findOne({
+        where: {
+          slug: platformSlug
+        }
+      });
+
       return await Permission.findAll({
-        where: { platformId }
+        where: { platformId: platform.id }
       });
     } catch (err) {
       throw err;

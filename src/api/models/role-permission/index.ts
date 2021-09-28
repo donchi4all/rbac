@@ -29,14 +29,10 @@ export class RolePermission extends Model<RolePermissionInterface> {
   })
   permissions: Permission[];
 
-
-
   @AllowNull(false)
   @Column(DataType.INTEGER)
   @ForeignKey(() => Role)
   roleId: RolePermissionInterface['roleId'];
-
-
 
   @AllowNull(false)
   @Column(DataType.INTEGER)

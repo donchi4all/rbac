@@ -17,11 +17,12 @@ import {
   RoleCreationRequestType,
   RoleInterface,
 } from '../../../api/models/role/IRole';
+import platformService from '../../../api/services/platform';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 import { BusinessUserRoleCreationType } from '../../models/business-user-role/IBusinessUserRole';
-import { RolePermissionCreationType } from '../../models/role-permission/IRolePermission';
+import { AddPermissionToRoleType, RolePermissionCreationType } from '../../models/role-permission/IRolePermission';
 
-@Route('role')
+@Route('platform/{platformSlug}/business/{business}/roles')
 @Tags('Role')
 export class roleController extends Controller {
   /**
@@ -39,10 +40,12 @@ export class roleController extends Controller {
   @Post('/')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async createRole(
+    platformSlug: string,
+    business: string,
     @Body() requestBody: RoleCreationRequestType
   ): Promise<Role[]> {
     try {
-      return await roleService.createRole(requestBody);
+      return await roleService.createRole(business, requestBody);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
@@ -52,20 +55,25 @@ export class roleController extends Controller {
   @Put('/{roleId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async updateRole(
+    platformSlug: string,
+    business: string,
     roleId: RoleInterface['id'],
     @Body() requestBody: RoleCreationRequestType
   ): Promise<Role> {
     try {
-      return await roleService.updateRole(roleId, requestBody);
+      return await roleService.updateRole(business, roleId, requestBody);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Get('/business/{business}')
+  @Get('/')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
-  public async listRoles(business: string): Promise<Role[]> {
+  public async listRoles(
+    platformSlug: string,
+    business: string
+  ): Promise<Role[]> {
     try {
       return await roleService.listRoles(business);
     } catch (err) {
@@ -74,79 +82,72 @@ export class roleController extends Controller {
     }
   }
 
-  @Get('{roleIdentifier}/business/{businessId}')
+  @Get('{roleIdentifier}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async findRole(
-    businessId: RoleInterface['businessId'],
+    business: RoleInterface['businessId'],
     roleIdentifier: string
   ): Promise<Role> {
     try {
-      return await roleService.findRole(businessId, roleIdentifier);
+      return await roleService.findRole(business, roleIdentifier);
     } catch (err) {
       this.log.error(`Failed to find role with id: ${roleIdentifier}`, err);
       throw err;
     }
   }
 
-  @Delete('{roleId}/business/{businessId}')
+  @Delete('{roleId}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async deleteRole(
-    businessId: RoleInterface['businessId'],
+    business: RoleInterface['businessId'],
     roleId: RoleInterface['id']
   ): Promise<void> {
     try {
-      return await roleService.deleteRole(businessId, roleId);
+      return await roleService.deleteRole(business, roleId);
     } catch (err) {
       this.log.error(`Route /role DELETE with err: ${err}`);
       throw err;
     }
   }
 
-  @Post('/business/{businessId}/add/permissions')
+  @Post('add-permissions')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async addRoleWithPermissions(
-    businessId: RoleInterface['businessId'],
-    @Body()
-    options: {
-      roleId: RolePermissionInterface['roleId'];
-      permissions:
-        | RolePermissionInterface['permissionId']
-        | RolePermissionInterface['permissionId'][];
-    }
+    platformSlug: string,
+    business: RoleInterface['businessId'],
+    @Body() options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
     try {
-      return await roleService.addRoleWithPermissions(businessId, options);
+      const platform = await platformService.findPlatform(platformSlug)
+      return await roleService.addRoleWithPermissions(platform.id, business, options);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }
   }
 
-
-
-  @Post('/business/{businessId}/sync/permissions')
+  @Post('sync-permissions')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async syncRoleWithPermissions(
-    businessId: RoleInterface['businessId'],
+    platformSlug: string,
+    business: RoleInterface['businessId'],
     @Body()
-    options: {
-      roleId: RolePermissionInterface['roleId'];
-      permissions:
-        | RolePermissionInterface['permissionId']
-        | RolePermissionInterface['permissionId'][];
-    }
+    options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
     try {
-      return await roleService.syncRoleWithPermissions(businessId, options);
+      const platform = await platformService.findPlatform(platformSlug);
+      return await roleService.syncRoleWithPermissions(platform.id, business, options);
     } catch (err) {
+      console.log(err)
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }
   }
 
-  @Post('/business/user-has-role')
+  @Post('user-has-role')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async businessUserHasRole(
+    platformSlug: string,
     @Body() payload: BusinessUserRoleCreationType
   ): Promise<boolean> {
     try {
@@ -157,9 +158,11 @@ export class roleController extends Controller {
     }
   }
 
-  @Post('/has-permission')
+  @Post('/role-has-permission')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async roleHasPermission(
+    platformSlug: string,
+    business: RoleInterface['businessId'],
     @Body() payload: RolePermissionCreationType
   ): Promise<boolean> {
     try {
