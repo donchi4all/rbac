@@ -4,7 +4,7 @@ import {
   BusinessInterface,
 } from '../../models/business/IBusiness';
 import platformService, { PlatformInterface } from '../../services/platform';
-import roleService from '../../services/Role';
+import roleService from '../../services/role';
 import {
   Business,
   BusinessUserRole,
@@ -39,9 +39,24 @@ export type UserHasPermissionRequest = {
 };
 
 export type UserRoleResponse = {
-  userId: BusinessUserRoleInterface['userId'];
-  roles: Record<string, Record<string, any>>;
+  userId: string|number;
+  roles: Array<Record<string, any>>;
 };
+
+export type UserPermissionResponse = {
+  userId: string|number;
+  permissions: Array<Record<string, any>>;
+};
+
+export type UserRoleSyncType = {
+  businessId: BusinessInterface['id'];
+  userId: BusinessUserRoleInterface['userId'];
+  roleId:
+    | BusinessUserRoleInterface['roleId']
+    | BusinessUserRoleInterface['roleId'][];
+};
+
+export type userHasPermission  = { userId: BusinessUserRoleInterface['userId'], permission: PermissionInterface['title']}
 
 class BusinessService implements IBusinessService {
   /**
@@ -220,9 +235,59 @@ class BusinessService implements IBusinessService {
   public async getBusinessWithRoleAndPermissions(
     platformSlug: PlatformInterface['slug'],
     _slug: BusinessInterface['slug']
-  ): Promise<Array<BusinessInterface>> {
+  ): Promise<unknown> {
     const platform = await platformService.findPlatform(platformSlug);
     const business = await this.findBusiness(platform.id, _slug);
+
+    const businessUserRole = await BusinessUserRole.findAll({
+      where: { businessId: business.id },
+      include: [
+        {
+          model: Role,
+          include: [
+            {
+              model: RolePermission,
+              attributes: ['id'],
+              include: [
+                {
+                  model: Permission,
+                  attributes: ['title', 'isActive', 'description', 'createdAt'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const userRole = businessUserRole.reduce(
+      (
+        result: Record<string, Record<string, any>>,
+        userRole: BusinessUserRole
+      ) => {
+        const role = userRole.role;
+        const permissions = role.rolePermissions.map((rolePermission) =>
+          rolePermission.permissions.map((_permission) => _permission)
+        );
+
+        if (!result[userRole.userId]) {
+          result[userRole.userId] = {
+            userId: userRole.userId,
+            [role.title]: permissions,
+          };
+        } else {
+          result[userRole.userId] = {
+            ...result[userRole.userId],
+            [role.title]: permissions,
+          };
+        }
+
+        return result;
+      },
+      {}
+    );
+
+    return { platform: platformSlug, business: _slug, userRole };
     return await Business.findAll({
       where: { id: business.id },
       include: [
@@ -268,15 +333,15 @@ class BusinessService implements IBusinessService {
     businessUserRoleData: BusinessUserRoleCreationType
   ): Promise<BusinessUserRoleInterface> {
     const platform = await platformService.findPlatform(platformSlug);
-    const { userId, roleId, businessId } = businessUserRoleData;
-    const business = await this.findBusinessById(platform.id, businessId);
+    const { userId, role, businessId } = businessUserRoleData;
+    const business = await this.findBusiness(platform.id, businessId);
 
     //check if this role belong to this business
-    await roleService.findRoleById(businessId, roleId);
+    const foundRole = await roleService.findRole(businessId, role);
     const businessUserRole = await this.findBusinessUserRole(
       business.id,
       userId,
-      roleId,
+      foundRole.id,
       false
     );
 
@@ -292,7 +357,7 @@ class BusinessService implements IBusinessService {
       const status = BusinessUserRoleStatus.ACTIVE;
       return await BusinessUserRole.create({
         userId,
-        roleId,
+        roleId: foundRole.id,
         status,
         businessId,
       });
@@ -336,7 +401,7 @@ class BusinessService implements IBusinessService {
   }
 
   /**
-   * Get business user role and permission
+   * Get business user roles
    * @param businessId
    * @param userId
    * @param rejectIfNotFound
@@ -351,19 +416,7 @@ class BusinessService implements IBusinessService {
       include: [
         {
           model: Role,
-          attributes: ['title', 'slug', 'isActive', 'description'],
-          include: [
-            {
-              model: RolePermission,
-              attributes: ['id'],
-              include: [
-                {
-                  model: Permission,
-                  attributes: ['title', 'isActive', 'description', 'createdAt'],
-                },
-              ],
-            },
-          ],
+          attributes: ['id', 'title', 'slug', 'isActive', 'description']
         },
       ],
     });
@@ -378,34 +431,120 @@ class BusinessService implements IBusinessService {
 
     const roles = businessUserRole.reduce(
       (
-        result: Record<string, Record<string, any>>,
+        result: Array<Record<string, any>>,
         privilege: BusinessUserRole
       ) => {
-        privilege.roles.map((role) => {
-          const _role = role.title;
-          const permissions: unknown[] = [];
-          role.rolePermissions.map((rolePermission) => {
-            rolePermission.permissions.map((_permission) => {
-              permissions.push(...[_permission]);
-            });
-          });
+        if(privilege.role){
+          result.push({
+            id: privilege?.role?.id,
+            title: privilege?.role?.title,
+            slug: privilege?.role?.slug,
+            description: privilege?.role?.description,
+          })
+        }
 
-          if (!result[_role]) {
-            result[_role] = { permissions };
-          } else {
-            result[_role] = {
-              ...result[_role],
-              permissions,
-            };
-          }
-        });
         return result;
       },
-      {}
+      []
     );
+
     return {
       userId: userId,
-      roles,
+      roles
+    };
+  }
+
+  /**
+   * Get business user permission
+   * @param businessId
+   * @param userId
+   * @param rejectIfNotFound
+   */
+   public async getBusinessUserPermissions(
+    businessId: string|number,
+    userId: string|number,
+    rejectIfNotFound: boolean = true
+  ): Promise<UserPermissionResponse> {
+    const businessUserRole = await BusinessUserRole.findAll({
+      where: { businessId, userId },
+      include: [
+        {
+          model: Permission,
+          attributes: ['title', 'slug', 'description'],
+        },
+      ],
+    });
+
+    if (!businessUserRole && rejectIfNotFound) {
+      return Promise.reject(
+        new BusinessUserRoleErrorHandler(
+          BusinessUserRoleErrorHandler.DoesNotExist
+        )
+      );
+    }
+
+    const permissions = businessUserRole.map(( role: any ) => {
+      role.permissions.forEach((permission: any) => delete permission.dataValues.RolePermission);
+      return role.permissions;
+    });
+
+    return {
+      userId: userId,
+      permissions,
+    };
+  }
+
+  /**
+   * Get business user role and permission
+   * @param businessId
+   * @param userId
+   * @param rejectIfNotFound
+   */
+   public async getBusinessUserRolesAndPermissions(
+    businessId: string|number,
+    userId: string|number,
+    rejectIfNotFound: boolean = true
+  ): Promise<UserRoleResponse> {
+    const businessUserRole = await BusinessUserRole.findAll({
+      where: { businessId, userId },
+      include: [
+        {
+          model: Role,
+          attributes: ['title', 'slug', 'isActive', 'description'],
+          include: [
+            {
+              model: Permission,
+              attributes: ['title', 'slug', 'description'],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!businessUserRole && rejectIfNotFound) {
+      return Promise.reject(
+        new BusinessUserRoleErrorHandler(
+          BusinessUserRoleErrorHandler.DoesNotExist
+        )
+      );
+    }
+
+    const roleAndPermissions = businessUserRole.map(( rolePermission: BusinessUserRole ) => {
+      rolePermission.role
+        ?.permission
+        ?.forEach((permission: any) => delete permission.dataValues.RolePermission);
+        
+      return {
+        "title": rolePermission.role.title,
+        "slug": rolePermission.role.slug,
+        "description": rolePermission.role.description,
+        "permissions": rolePermission.role.permission
+      }
+    });
+    
+    return {
+      userId: userId,
+      roles: roleAndPermissions,
     };
   }
 
@@ -415,9 +554,10 @@ class BusinessService implements IBusinessService {
    * @param permission
    */
   public async userPermissions(
-    userId: BusinessUserRoleInterface['userId'],
-    permission: string
+    payload : userHasPermission
   ): Promise<boolean> {
+
+   const { userId, permission } = payload;
     const userPermissions = await BusinessUserRole.findOne({
       where: { userId: userId },
       include: [
@@ -427,8 +567,37 @@ class BusinessService implements IBusinessService {
         },
       ],
     });
-
     return (userPermissions && true) || false;
+  }
+
+  public async syncUserWithRole(
+    platformSlug: PlatformInterface['slug'],
+    payload: UserRoleSyncType
+  ): Promise<unknown> {
+    const platform = await platformService.findPlatform(platformSlug);
+
+    if (!Array.isArray(payload['roleId'])) {
+      payload['roleId'] = [payload['roleId']];
+    }
+    const { businessId, userId, roleId } = payload;
+
+    try {
+      await this.findBusinessById(platform.id, businessId);
+
+      //remove all the current role a user has
+      await BusinessUserRole.destroy({ where: { businessId, userId } });
+
+      //added a new role to the user
+      const records: any[] = roleId.map((role_id) => {
+        // const role = await roleService.findRoleById(businessId, role_id,false);
+        // if(role)
+        return { userId, roleId: role_id, status: 'active', businessId };
+      });
+
+      return await BusinessUserRole.bulkCreate([...records]);
+    } catch (e) {
+      throw new BusinessUserRoleErrorHandler(CommonErrorHandler.Fatal);
+    }
   }
 }
 

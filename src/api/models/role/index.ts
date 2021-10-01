@@ -7,11 +7,11 @@ import {
   AllowNull,
   CreatedAt,
   UpdatedAt,
-  DataType, BelongsTo, HasMany
+  DataType, BelongsTo, HasMany, BelongsToMany
 } from 'sequelize-typescript';
 import { StringsFormating as Str} from '../../../utils';
 import { RoleInterface, RoleCreationType } from './IRole';
-import {Business, RolePermission} from '../index';
+import {Business, Permission, RolePermission} from '../index';
 
 @Table({
   tableName: 'role',
@@ -34,7 +34,15 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
   @HasMany(() => RolePermission)
   rolePermissions: RolePermission[];
 
-
+  @BelongsToMany(() => Permission, {
+    through: {
+      model: () => RolePermission,
+    },
+    foreignKey: 'roleId',
+    foreignKeyConstraint: false
+  })
+  permission: Permission[];
+  
   @Column(DataType.STRING)
   title: RoleInterface['title'];
 

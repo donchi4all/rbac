@@ -34,7 +34,7 @@ export interface IPermissionService {
      * @returns 
      */
     listPermissions (
-        platformId: PermissionInterface['platformId']
+        platformId: string
     ):  Promise<Array<Permission>>
 
     /**
@@ -43,7 +43,7 @@ export interface IPermissionService {
      * @param identifier 
      * @returns 
      */
-    findPermission (identifier: string): Promise<Permission>
+     findPermission(platformId: number, identifier: string): Promise<Permission>
 
     /**
      * Delete an existing permission
@@ -51,5 +51,5 @@ export interface IPermissionService {
      * @param identifier 
      * @returns 
      */
-    deletePermission (identifier: string): Promise<void>
+    deletePermission (platformId:number,identifier: string): Promise<void>
 }

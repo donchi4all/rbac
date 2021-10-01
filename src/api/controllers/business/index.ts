@@ -17,11 +17,14 @@ import businessService, {
   BusinessInterface,
   BusinessUserRoleCreationType,
   PlatformInterface,
+  userHasPermission,
   UserRoleResponse,
+  UserRoleSyncType,
 } from '../../services/business';
+import platformService from '../../../api/services/platform';
 import { BusinessUserRoleInterface } from '../../models/business-user-role/IBusinessUserRole';
 
-@Route('platform')
+@Route('platforms/{platformSlug}')
 @Tags('Business')
 export class BusinessController extends Controller {
   //#region FIELDS
@@ -30,7 +33,7 @@ export class BusinessController extends Controller {
   //#endregion
 
   //#region "/" ENDPOINTS
-  @Get('{platformSlug}/business')
+  @Get('business')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listBusiness(
     platformSlug: PlatformInterface['slug']
@@ -44,7 +47,7 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Get('{platformSlug}/business/{businessSlug}')
+  @Get('business/{businessSlug}')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async getPBusiness(
     platformSlug: PlatformInterface['slug'],
@@ -63,7 +66,7 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Post('{platformSlug}/business')
+  @Post('business')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async createBusiness(
     platformSlug: PlatformInterface['slug'],
@@ -80,7 +83,7 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Patch('{platformSlug}/business/{businessSlug}')
+  @Patch('business/{businessSlug}')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async updateBusiness(
     platformSlug: PlatformInterface['slug'],
@@ -98,7 +101,7 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Delete('{platformSlug}/business/{businessSlug}')
+  @Delete('business/{businessSlug}')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async deleteBusiness(
     platformSlug: PlatformInterface['slug'],
@@ -118,7 +121,7 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Post('{platformSlug}/business/sync/user-role')
+  @Post('business/add-user-role')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async assignRoleToBusinessUser(
     platformSlug: PlatformInterface['slug'],
@@ -126,7 +129,7 @@ export class BusinessController extends Controller {
   ): Promise<BusinessUserRoleInterface> {
     try {
       this.log.info(
-        `Route /${platformSlug}/business/sync-user-role Post business with data: ${JSON.stringify(
+        `Route /${platformSlug}/business/add-user-role Post business with data: ${JSON.stringify(
           businessUserRoleData
         )}`
       );
@@ -136,18 +139,18 @@ export class BusinessController extends Controller {
       );
     } catch (err) {
       this.log.error(
-        `Route /${platformSlug}/business/sync-user-roles Post with err: ${err}`
+        `Route /${platformSlug}/business/add-user-roles Post with err: ${err}`
       );
       throw err;
     }
   }
 
-  @Get('{platformSlug}/business/{businessSlug}/users')
+  @Get('business/{businessSlug}/users')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async getBusinessWithRoleAndPermissions(
     platformSlug: PlatformInterface['slug'],
     businessSlug: BusinessInterface['slug']
-  ): Promise<Array<BusinessInterface>> {
+  ): Promise<unknown> {
     try {
       this.log.info(
         `Route /${platformSlug}/business/${businessSlug}/users Get business users and it's role`
@@ -164,9 +167,47 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Get('business/{businessId}/users/{userId}')
+  @Post('business/users/has-permission')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async userHasPermissions(
+    platformSlug: PlatformInterface['slug'],
+    @Body() payload : userHasPermission
+  ): Promise<boolean> {
+    try {
+      this.log.info(
+        'Route business/users/has-permission Get business users and its role'
+      );
+      return businessService.userPermissions(payload);
+    } catch (err) {
+      this.log.error(
+        `Route business/users/has-permission Get with err: ${err}`
+      );
+    }
+  }
+
+  @Post('business/sync-user-role')
+  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
+  public async syncUserWithRole(
+    platformSlug: PlatformInterface['slug'],
+    @Body() payload: UserRoleSyncType
+  ): Promise<unknown> {
+    try {
+      this.log.info(
+        `Route /business/sync/user-role Post business with data: ${JSON.stringify(
+          payload
+        )}`
+      );
+      return businessService.syncUserWithRole(platformSlug,payload);
+    } catch (err) {
+      this.log.error(`Route /business/sync-user-role Post with err: ${err}`);
+      throw err;
+    }
+  }
+
+  @Get('business/{businessId}/users/{userId}/roles')
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async getBusinessUserRole(
+    platformSlug: PlatformInterface['slug'],
     businessId: BusinessUserRoleInterface['businessId'],
     userId: BusinessUserRoleInterface['userId']
   ): Promise<UserRoleResponse> {
@@ -183,21 +224,40 @@ export class BusinessController extends Controller {
     }
   }
 
-  @Get('business/users/{userId}/{permission}')
-  @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
-  public async getUserWithPermissions(
-    userId: BusinessUserRoleInterface['userId'],
-    permission: string
-  ): Promise<boolean> {
+  /**
+  * List auth user permissions in active business
+  */
+  @Get('business/{businessId}/users/{userId}/permissions')
+  @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
+  public async listUserPermissions(
+  platformSlug: PlatformInterface['slug'],
+  businessId: string|number,
+  userId: string|number,
+  ): Promise<unknown> {
     try {
-      this.log.info(
-        `Route business/users/${userId}/${permission} Get business users and it's role`
-      );
-      return businessService.userPermissions(userId, permission);
+      const platform = platformService.findPlatform(platformSlug);
+      return await businessService.getBusinessUserPermissions(businessId, userId);
     } catch (err) {
-      this.log.error(
-        `Route business/users/${userId}/${permission} Get with err: ${err}`
-      );
+      this.log.error( `Route rbac/permissions Get with err: ${JSON.stringify(err)}` );
+      throw err;
+    }
+  }
+
+  /**
+  * List auth user roles & permissions in active business
+  */
+  @Get('business/{businessId}/users/{userId}/roles-and-permissions')
+  @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
+  public async listUserRolesAndPermissions(
+  platformSlug: PlatformInterface['slug'],
+  businessId: string|number,
+  userId: string|number,
+  ): Promise<unknown> {
+    try {
+      const platform = platformService.findPlatform(platformSlug);
+      return await businessService.getBusinessUserRolesAndPermissions(businessId, userId);
+    } catch (err) {
+      this.log.error( `Route rbac/permissions Get with err: ${JSON.stringify(err)}` );
       throw err;
     }
   }

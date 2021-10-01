@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Permission } from '../../models';
+import { Permission, Platform } from '../../models';
 import {
   PermissionCreationRequestType,
   PermissionEditRequestType,
@@ -75,10 +75,16 @@ class PermissionService implements IPermissionService {
    *
    * @returns
    */
-  public async listPermissions(platformId: number): Promise<Array<Permission>> {
+  public async listPermissions(platformSlug: string): Promise<Array<Permission>> {
     try {
+      const platform = await Platform.findOne({
+        where: {
+          slug: platformSlug
+        }
+      });
+
       return await Permission.findAll({
-        // where: { platformId }
+        where: { platformId: platform.id }
       });
     } catch (err) {
       throw err;
@@ -91,11 +97,12 @@ class PermissionService implements IPermissionService {
    * @param identifier
    * @returns
    */
-  public async findPermission(identifier: string): Promise<Permission> {
+  public async findPermission(platformId: number, identifier: string): Promise<Permission> {
     try {
       const beneficiary = await Permission.findOne({
         where: {
           [Op.or]: [{ slug: identifier }, { title: identifier }],
+          [Op.and]: [{ platformId: platformId }]
         },
       });
 
@@ -117,9 +124,9 @@ class PermissionService implements IPermissionService {
    * @param identifier
    * @returns
    */
-  public async deletePermission(identifier: string): Promise<void> {
+  public async deletePermission(platformId:number,identifier: string): Promise<void> {
     try {
-      const permission = await this.findPermission(identifier);
+      const permission = await this.findPermission(platformId,identifier);
       await permission.destroy();
 
       return;

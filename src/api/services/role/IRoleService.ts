@@ -16,6 +16,7 @@ export interface IRoleService {
    * @returns
    */
   createRole(
+    business: string,
     payload: RoleCreationRequestType | RoleCreationRequestType[]
   ): Promise<Array<Role>>;
 
@@ -38,7 +39,11 @@ export interface IRoleService {
    * @param payload
    * @returns
    */
-  updateRole(roleId: string, payload: RoleEditRequestType): Promise<Role>;
+  updateRole(
+    business: string,
+    roleId: RoleInterface['id'],
+    payload: RoleEditRequestType
+  ): Promise<Role>;
 
   /**
    * Fetch list of roles
@@ -53,7 +58,10 @@ export interface IRoleService {
    * @param identifier
    * @returns
    */
-  findRole(identifier: string): Promise<Role>;
+  findRole(
+    businessId: RoleInterface['businessId'],
+    identifier: string
+  ): Promise<Role>;
 
   /**
    * Delete an existing role
@@ -61,7 +69,10 @@ export interface IRoleService {
    * @param roleId
    * @returns
    */
-  deleteRole(roleId: string): Promise<void>;
+  deleteRole(
+    businessId: RoleInterface['businessId'],
+    roleId: RoleInterface['id']
+  ): Promise<void>;
 
   /**
    * Business User Role Checker

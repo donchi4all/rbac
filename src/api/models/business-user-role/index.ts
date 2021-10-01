@@ -41,8 +41,11 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
   })
   business: Business;
 
-  @HasMany(() => Role, 'id')
-  roles: Role[];
+  @BelongsTo(() => Role, {
+    foreignKey: 'roleId',
+    foreignKeyConstraint: false,
+  })
+  role: Role;
 
   @BelongsToMany(() => Permission, {
     through: {
@@ -52,6 +55,8 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
     foreignKeyConstraint: false,
   })
   permissions: Permission[];
+
+  
 
   @AllowNull(false)
   @Column(DataType.INTEGER)
