@@ -103,6 +103,7 @@ export interface IBusinessService {
    * @param rejectIfNotFound
    */
   getBusinessUserRole(
+    platformSlug: PlatformInterface['slug'],
     businessId: BusinessUserRoleInterface['businessId'],
     userId: BusinessUserRoleInterface['userId'],
     rejectIfNotFound: boolean

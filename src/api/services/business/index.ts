@@ -25,6 +25,7 @@ import {
   BusinessUserRoleStatus,
 } from '../../models/business-user-role/IBusinessUserRole';
 import { PermissionInterface } from '../../models/permission/IPermission';
+import { title } from 'process';
 
 export {
   BusinessInterface,
@@ -433,12 +434,15 @@ class BusinessService implements IBusinessService {
    * @param rejectIfNotFound
    */
   public async getBusinessUserRole(
+    platformSlug: PlatformInterface['slug'],
     businessId: BusinessUserRoleInterface['businessId'],
     userId: BusinessUserRoleInterface['userId'],
     rejectIfNotFound: boolean = true
   ): Promise<UserRoleResponse> {
+    const platform = await platformService.findPlatform(platformSlug);
+    const business = await this.findBusiness(platform.id, businessId);
     const businessUserRole = await BusinessUserRole.findAll({
-      where: { businessId, userId },
+      where: { businessId: business.id, userId },
       include: [
         {
           model: Role,
@@ -517,9 +521,15 @@ class BusinessService implements IBusinessService {
       return result;
     }, []);
 
+    const uniquePermissions = [
+      ...new Map(
+        permissions.map((item: { [x: string]: any }) => [item['title'], item])
+      ).values(),
+    ];
+
     return {
       userId: userId,
-      permissions: permissions,
+      permissions: uniquePermissions,
     };
   }
 

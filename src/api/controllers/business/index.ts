@@ -215,7 +215,11 @@ export class BusinessController extends Controller {
       this.log.info(
         `Route business/${businessId}/users/${userId} Get business users and it's role`
       );
-      return businessService.getBusinessUserRole(businessId, userId);
+      return businessService.getBusinessUserRole(
+        platformSlug,
+        businessId,
+        userId
+      );
     } catch (err) {
       this.log.error(
         `Route business/${businessId}/users/${userId} Get with err: ${err}`
