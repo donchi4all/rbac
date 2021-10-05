@@ -51,12 +51,11 @@ export class BusinessUserRole extends Model<BusinessUserRoleInterface> {
     through: {
       model: () => RolePermission,
     },
+    sourceKey: 'roleId',
     foreignKey: 'roleId',
     foreignKeyConstraint: false,
   })
   permissions: Permission[];
-
-  
 
   @AllowNull(false)
   @Column(DataType.INTEGER)

@@ -7,11 +7,15 @@ import {
   AllowNull,
   CreatedAt,
   UpdatedAt,
-  DataType, BelongsTo, HasMany, BelongsToMany
+  DataType,
+  BelongsTo,
+  HasMany,
+  BelongsToMany,
+  Unique,
 } from 'sequelize-typescript';
-import { StringsFormating as Str} from '../../../utils';
+import { StringsFormating as Str } from '../../../utils';
 import { RoleInterface, RoleCreationType } from './IRole';
-import {Business, Permission, RolePermission} from '../index';
+import { Business, Permission, RolePermission } from '../index';
 
 @Table({
   tableName: 'role',
@@ -21,7 +25,6 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
   @AutoIncrement
   @Column(DataType.INTEGER)
   id: number;
-
 
   @BelongsTo(() => Business, {
     foreignKey: 'businessId',
@@ -39,18 +42,19 @@ export class Role extends Model<RoleInterface, RoleCreationType> {
       model: () => RolePermission,
     },
     foreignKey: 'roleId',
-    foreignKeyConstraint: false
+    foreignKeyConstraint: false,
   })
   permission: Permission[];
-  
+
+  @Unique(true)
   @Column(DataType.STRING)
   title: RoleInterface['title'];
 
   @Column({
     type: DataType.STRING,
-        set (value: string): void {
+    set(value: string): void {
       this.setDataValue('slug', Str.toSlugCase(value));
-    }
+    },
   })
   slug: RoleInterface['slug'];
 

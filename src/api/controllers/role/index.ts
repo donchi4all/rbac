@@ -12,7 +12,7 @@ import {
 
 import httpStatuses from '../../httpStatuses';
 import roleService, { RolePermissionInterface } from '../../services/role';
-import { Role } from '../../../api/models';
+import { Role, RolePermission } from '../../../api/models';
 import {
   RoleCreationRequestType,
   RoleInterface,
@@ -20,9 +20,12 @@ import {
 import platformService from '../../../api/services/platform';
 import { LoggerDecorator, LoggerInterface } from '../../../modules/logger';
 import { BusinessUserRoleCreationType } from '../../models/business-user-role/IBusinessUserRole';
-import { AddPermissionToRoleType, RolePermissionCreationType } from '../../models/role-permission/IRolePermission';
+import {
+  AddPermissionToRoleType,
+  RolePermissionCreationType,
+} from '../../models/role-permission/IRolePermission';
 
-@Route('platform/{platformSlug}/business/{business}/roles')
+@Route('platforms/{platformSlug}/business/{business}/roles')
 @Tags('Role')
 export class roleController extends Controller {
   /**
@@ -42,10 +45,10 @@ export class roleController extends Controller {
   public async createRole(
     platformSlug: string,
     business: string,
-    @Body() requestBody: RoleCreationRequestType
-  ): Promise<Role[]> {
+    @Body() requestBody: RoleCreationRequestType | RoleCreationRequestType[]
+  ): Promise<Array<RoleInterface>> {
     try {
-      return await roleService.createRole(business, requestBody);
+      return await roleService.createRole(platformSlug, business, requestBody);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
@@ -75,7 +78,7 @@ export class roleController extends Controller {
     business: string
   ): Promise<Role[]> {
     try {
-      return await roleService.listRoles(business);
+      return await roleService.listRoles(platformSlug, business);
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
@@ -118,8 +121,12 @@ export class roleController extends Controller {
     @Body() options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
     try {
-      const platform = await platformService.findPlatform(platformSlug)
-      return await roleService.addRoleWithPermissions(platform.id, business, options);
+      const platform = await platformService.findPlatform(platformSlug);
+      return await roleService.addRoleWithPermissions(
+        platform.id,
+        business,
+        options
+      );
     } catch (err) {
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
@@ -136,9 +143,13 @@ export class roleController extends Controller {
   ): Promise<Array<RolePermissionInterface>> {
     try {
       const platform = await platformService.findPlatform(platformSlug);
-      return await roleService.syncRoleWithPermissions(platform.id, business, options);
+      return await roleService.syncRoleWithPermissions(
+        platform.id,
+        business,
+        options
+      );
     } catch (err) {
-      console.log(err)
+      console.log(err);
       this.log.error(`Route /role POST with err: ${err}`);
       throw err;
     }

@@ -16,9 +16,10 @@ export interface IRoleService {
    * @returns
    */
   createRole(
+    platformSlug: string,
     business: string,
     payload: RoleCreationRequestType | RoleCreationRequestType[]
-  ): Promise<Array<Role>>;
+  ): Promise<Array<RoleInterface>>;
 
   /**
    * Sudo Implementation for model findOrCreate (WIP)
@@ -50,7 +51,10 @@ export interface IRoleService {
    *
    * @returns
    */
-  listRoles(businessId: RoleInterface['businessId']): Promise<Array<Role>>;
+  listRoles(
+    platformSlug: string,
+    businessId: RoleInterface['businessId']
+  ): Promise<Array<Role>>;
 
   /**
    * Find an existing role

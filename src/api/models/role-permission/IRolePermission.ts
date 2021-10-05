@@ -5,8 +5,11 @@ export interface RolePermissionInterface {
 }
 
 export interface AddPermissionToRoleType {
-  roleId: string|number,
-  permissions: string|Array<string>
+  role: string | number;
+  permissions: string | Array<string>;
 }
 
-export type RolePermissionCreationType = Pick<RolePermissionInterface, 'roleId'|'permissionId' >
+export type RolePermissionCreationType = Pick<
+  RolePermissionInterface,
+  'roleId' | 'permissionId'
+>;

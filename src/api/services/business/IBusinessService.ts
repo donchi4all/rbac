@@ -19,7 +19,7 @@ export interface IBusinessService {
   createBusiness(
     businessData: BusinessCreationType | BusinessCreationType[],
     platformSlug: PlatformInterface['slug']
-  ): Promise<Array<BusinessInterface>>;
+  ): Promise<BusinessInterface>;
 
   /**
    * Find Business in a platform
@@ -113,7 +113,5 @@ export interface IBusinessService {
    * @param userId
    * @param permission
    */
-  userPermissions(
-    payload : userHasPermission
-  ): Promise<boolean>;
+  userPermissions(payload: userHasPermission): Promise<boolean>;
 }

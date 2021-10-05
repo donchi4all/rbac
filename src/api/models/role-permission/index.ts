@@ -7,10 +7,10 @@ import {
   DataType,
   HasMany,
   AllowNull,
-  ForeignKey
+  ForeignKey,
 } from 'sequelize-typescript';
 import { RolePermissionInterface } from './IRolePermission';
-import {Permission, Role} from '../index';
+import { Permission, Role } from '../index';
 
 @Table({
   tableName: 'rolePermission',
@@ -24,8 +24,8 @@ export class RolePermission extends Model<RolePermissionInterface> {
   id: RolePermissionInterface['id'];
 
   @HasMany(() => Permission, {
-    sourceKey: 'permissionId',
-    foreignKey: 'id',
+    sourceKey: 'id',
+    foreignKey: 'permissionId',
   })
   permissions: Permission[];
 

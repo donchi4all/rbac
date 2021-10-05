@@ -24,7 +24,7 @@ class PlatformService implements IPlatformService {
     try {
       const platform = await Platform.findOne({
         where: {
-          [Op.or]: [{ slug: value }, { name: value }],
+          [Op.or]: [{ slug: value }, { name: value }, { id: value }],
         },
       });
 
@@ -34,9 +34,9 @@ class PlatformService implements IPlatformService {
         );
       }
 
-      if(platform && !platform.isActive){
+      if (platform && !platform.isActive) {
         return Promise.reject(
-            new PlatformErrorHandler(PlatformErrorHandler.Forbidden)
+          new PlatformErrorHandler(PlatformErrorHandler.Forbidden)
         );
       }
       return platform;
