@@ -70,8 +70,8 @@ export class BusinessController extends Controller {
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async createBusiness(
     platformSlug: PlatformInterface['slug'],
-    @Body() data: BusinessCreationType | BusinessCreationType[]
-  ): Promise<Array<BusinessInterface>> {
+    @Body() data: BusinessCreationType
+  ): Promise<BusinessInterface> {
     try {
       this.log.info(
         `Route /business POST business data: ${JSON.stringify(data)}`
@@ -171,7 +171,7 @@ export class BusinessController extends Controller {
   @SuccessResponse(httpStatuses.created.code, httpStatuses.created.message)
   public async userHasPermissions(
     platformSlug: PlatformInterface['slug'],
-    @Body() payload : userHasPermission
+    @Body() payload: userHasPermission
   ): Promise<boolean> {
     try {
       this.log.info(
@@ -197,7 +197,7 @@ export class BusinessController extends Controller {
           payload
         )}`
       );
-      return businessService.syncUserWithRole(platformSlug,payload);
+      return businessService.syncUserWithRole(platformSlug, payload);
     } catch (err) {
       this.log.error(`Route /business/sync-user-role Post with err: ${err}`);
       throw err;
@@ -215,7 +215,11 @@ export class BusinessController extends Controller {
       this.log.info(
         `Route business/${businessId}/users/${userId} Get business users and it's role`
       );
-      return businessService.getBusinessUserRole(businessId, userId);
+      return businessService.getBusinessUserRole(
+        platformSlug,
+        businessId,
+        userId
+      );
     } catch (err) {
       this.log.error(
         `Route business/${businessId}/users/${userId} Get with err: ${err}`
@@ -225,39 +229,49 @@ export class BusinessController extends Controller {
   }
 
   /**
-  * List auth user permissions in active business
-  */
+   * List auth user permissions in active business
+   */
   @Get('business/{businessId}/users/{userId}/permissions')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listUserPermissions(
-  platformSlug: PlatformInterface['slug'],
-  businessId: string|number,
-  userId: string|number,
+    platformSlug: PlatformInterface['slug'],
+    businessId: string | number,
+    userId: string | number
   ): Promise<unknown> {
     try {
-      const platform = platformService.findPlatform(platformSlug);
-      return await businessService.getBusinessUserPermissions(businessId, userId);
+      return await businessService.getBusinessUserPermissions(
+        platformSlug,
+        businessId,
+        userId
+      );
     } catch (err) {
-      this.log.error( `Route rbac/permissions Get with err: ${JSON.stringify(err)}` );
+      this.log.error(
+        `Route rbac/permissions Get with err: ${JSON.stringify(err)}`
+      );
       throw err;
     }
   }
 
   /**
-  * List auth user roles & permissions in active business
-  */
+   * List auth user roles & permissions in active business
+   */
   @Get('business/{businessId}/users/{userId}/roles-and-permissions')
   @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
   public async listUserRolesAndPermissions(
-  platformSlug: PlatformInterface['slug'],
-  businessId: string|number,
-  userId: string|number,
+    platformSlug: PlatformInterface['slug'],
+    businessId: string | number,
+    userId: string | number
   ): Promise<unknown> {
     try {
       const platform = platformService.findPlatform(platformSlug);
-      return await businessService.getBusinessUserRolesAndPermissions(businessId, userId);
+      return await businessService.getBusinessUserRolesAndPermissions(
+        businessId,
+        userId
+      );
     } catch (err) {
-      this.log.error( `Route rbac/permissions Get with err: ${JSON.stringify(err)}` );
+      this.log.error(
+        `Route rbac/permissions Get with err: ${JSON.stringify(err)}`
+      );
       throw err;
     }
   }

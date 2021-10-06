@@ -1,5 +1,12 @@
+/* eslint-disable prefer-const */
 import { Op, where } from 'sequelize';
-import { Business, BusinessUserRole, Permission, Role, RolePermission } from '../../models';
+import {
+  Business,
+  BusinessUserRole,
+  Permission,
+  Role,
+  RolePermission,
+} from '../../models';
 import {
   RoleCreationRequestType,
   RoleCreationType,
@@ -8,6 +15,7 @@ import {
 } from '../../models/role/IRole';
 import { IRoleService } from './IRoleService';
 import {
+  BusinessErrorHandler,
   CommonErrorHandler,
   PermissionErrorHandler,
   RoleErrorHandler,
@@ -20,6 +28,7 @@ import {
 } from '../../models/role-permission/IRolePermission';
 import businessService, { BusinessUserRoleCreationType } from '../business';
 import permissionService from '../permission';
+import platformService from '../platform';
 
 export { RolePermissionInterface };
 
@@ -31,23 +40,39 @@ class RoleService implements IRoleService {
    * @returns
    */
   public async createRole(
-    businessId: string,
+    platformSlug: string,
+    businessValue: string,
     payload: RoleCreationRequestType | RoleCreationRequestType[]
-  ): Promise<Array<Role>> {
+  ): Promise<Array<RoleInterface>> {
     try {
       if (!Array.isArray(payload)) {
         payload = [payload];
       }
+      const platform = await platformService.findPlatform(platformSlug);
+      const business = await businessService.findBusiness(
+        platform.id,
+        businessValue,
+        false
+      );
+      if (!business) {
+        return Promise.reject(
+          new BusinessErrorHandler(BusinessErrorHandler.DoesNotExist)
+        );
+      }
 
-      const business = await Business.findOne({ where: {id: businessId} });
       const role = Promise.all(
         payload.map(async (payload) => {
           const [title, slug] = Array(2).fill(payload.title);
-          return await Role.create({ ...payload, businessId: business.id, title, slug });
+          return await Role.create({
+            ...payload,
+            businessId: business.id,
+            title,
+            slug,
+          });
         })
       );
 
-      return role;
+      return role as unknown as Array<RoleInterface>;
     } catch (err) {
       throw err;
     }
@@ -124,11 +149,24 @@ class RoleService implements IRoleService {
    * @returns
    */
   public async listRoles(
+    platformSlug: string,
     businessId: RoleInterface['businessId']
   ): Promise<Array<Role>> {
+    const platform = await platformService.findPlatform(platformSlug);
+    const business = await businessService.findBusiness(
+      platform.id,
+      businessId,
+      false
+    );
+    if (!business) {
+      return Promise.reject(
+        new BusinessErrorHandler(BusinessErrorHandler.DoesNotExist)
+      );
+    }
+
     try {
       return await Role.findAll({
-        where: { businessId },
+        where: { businessId: business.id },
       });
     } catch (err) {
       throw err;
@@ -143,15 +181,19 @@ class RoleService implements IRoleService {
    */
   public async findRole(
     businessId: RoleInterface['businessId'],
-    identifier: string|number
+    identifier: string | number
   ): Promise<Role> {
     try {
       const role = await Role.findOne({
         where: {
-          [Op.or]: [{id: identifier}, { slug: identifier }, { title: identifier }],
+          [Op.or]: [
+            { id: identifier },
+            { slug: identifier },
+            { title: identifier },
+          ],
           [Op.and]: [{ businessId }],
         },
-        include: Business
+        include: Business,
       });
 
       if (!role) {
@@ -223,50 +265,57 @@ class RoleService implements IRoleService {
    * @param options
    */
   public async addRoleWithPermissions(
-    platformId: string|number,
+    platformId: string | number,
     businessId: RoleInterface['businessId'],
     options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
-    try{
-      let { roleId, permissions } = options;
-      const role = await this.findRole(businessId, roleId);
-
+    try {
+      let { role, permissions } = options;
+      const business = await businessService.findBusiness(
+        platformId,
+        businessId
+      );
+      console.log(business);
+      const getRole = await this.findRole(business.id, role);
+      console.log(getRole);
+      const roleId = getRole.id;
       if (!Array.isArray(permissions)) {
         permissions = [permissions];
       }
-  
+
       const permissionIds = await Permission.findAll({
         where: {
-          [Op.or]: [{id: {[Op.in]: permissions}}],
-          [Op.or]: [{slug: {[Op.in]: permissions}}],
-          [Op.or]: [{title: {[Op.in]: permissions}}],
+          [Op.or]: [{ id: { [Op.in]: permissions } }],
+          [Op.or]: [{ slug: { [Op.in]: permissions } }],
+          [Op.or]: [{ title: { [Op.in]: permissions } }],
           [Op.and]: [{ platformId }],
         },
-        attributes: ['id']
+        attributes: ['id'],
       });
 
-      const bulkInsert = permissionIds.reduce((
-        result: any,
-        permission: Permission
-      ) => {
-        result.push({roleId, permissionId: permission.id});
-        return result;
-      }, [])
-  
+      const bulkInsert = permissionIds.reduce(
+        (result: any, permission: Permission) => {
+          result.push({ roleId, permissionId: permission.id });
+          return result;
+        },
+        []
+      );
+
       return await RolePermission.bulkCreate(bulkInsert);
-    }
-    catch(error){
+    } catch (error) {
       throw error;
     }
   }
 
   public async syncRoleWithPermissions(
-    platform: string|number,
+    platform: string | number,
     businessId: RoleInterface['businessId'],
     options: AddPermissionToRoleType
   ): Promise<Array<RolePermissionInterface>> {
     try {
-      await RolePermission.destroy({ where: { roleId: options['roleId'] } });
+      const getRole = await this.findRole(businessId, options['role']);
+      const roleId = getRole.id;
+      await RolePermission.destroy({ where: { roleId: roleId } });
       return await this.addRoleWithPermissions(platform, businessId, options);
     } catch (error) {
       throw error;
