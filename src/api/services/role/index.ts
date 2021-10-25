@@ -400,6 +400,30 @@ class RoleService implements IRoleService {
       throw new RoleErrorHandler(CommonErrorHandler.Fatal);
     }
   }
+
+  public async findRoles(
+    businessId: RoleInterface['businessId'],
+    identifiers: string[] | number[]
+  ): Promise<Array<Role>> {
+    try {
+      const roles = await Role.findAll({
+        where: {
+          slug: { [Op.or]: identifiers },
+          title: { [Op.or]: identifiers },
+          [Op.and]: [{ businessId }],
+        },
+        include: Business,
+      });
+
+      if (roles.length < 1) {
+        return Promise.reject(new RoleErrorHandler(RoleErrorHandler.NotExist));
+      }
+
+      return roles;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 const roleService = new RoleService();
