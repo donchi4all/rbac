@@ -52,9 +52,7 @@ export type UserPermissionResponse = {
 export type UserRoleSyncType = {
   businessId: BusinessInterface['id'];
   userId: BusinessUserRoleInterface['userId'];
-  roleId:
-    | BusinessUserRoleInterface['roleId']
-    | BusinessUserRoleInterface['roleId'][];
+  role: string | string[];
 };
 
 export type userHasPermission = {
@@ -614,27 +612,32 @@ class BusinessService implements IBusinessService {
   ): Promise<unknown> {
     const platform = await platformService.findPlatform(platformSlug);
 
-    if (!Array.isArray(payload['roleId'])) {
-      payload['roleId'] = [payload['roleId']];
+    if (!Array.isArray(payload['role'])) {
+      payload['role'] = [payload['role']];
     }
-    const { businessId, userId, roleId } = payload;
+    const { businessId, userId, role } = payload;
 
     try {
-      await this.findBusinessById(platform.id, businessId);
-
+      const business = await this.findBusiness(platform.id, businessId);
       //remove all the current role a user has
-      await BusinessUserRole.destroy({ where: { businessId, userId } });
+      await BusinessUserRole.destroy({
+        where: { businessId: business.id, userId },
+      });
 
-      //added a new role to the user
-      const records: any[] = roleId.map((role_id) => {
-        // const role = await roleService.findRoleById(businessId, role_id,false);
-        // if(role)
-        return { userId, roleId: role_id, status: 'active', businessId };
+      const roles = await roleService.findRoles(business.id, role);
+
+      const records: any[] = roles.map((role) => {
+        return {
+          userId,
+          roleId: role.id,
+          status: 'active',
+          businessId: business.id,
+        };
       });
 
       return await BusinessUserRole.bulkCreate([...records]);
     } catch (e) {
-      throw new BusinessUserRoleErrorHandler(CommonErrorHandler.Fatal);
+      throw e;
     }
   }
 }
