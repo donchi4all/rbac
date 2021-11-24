@@ -275,9 +275,7 @@ class RoleService implements IRoleService {
         platformId,
         businessId
       );
-      console.log(business);
       const getRole = await this.findRole(business.id, role);
-      console.log(getRole);
       const roleId = getRole.id;
       if (!Array.isArray(permissions)) {
         permissions = [permissions];

@@ -115,4 +115,16 @@ export interface IBusinessService {
    * @param permission
    */
   userPermissions(payload: userHasPermission): Promise<boolean>;
+
+  /**
+   * Find businessUsers with Role
+   * @param platformSlug
+   * @param businessId
+   * @param roleSlug
+   */
+  findBusinessUserByRole(
+    platformSlug: PlatformInterface['slug'],
+    businessId: BusinessUserRoleInterface['businessId'],
+    roleSlug: string
+  ): Promise<Array<BusinessUserRoleInterface>>;
 }

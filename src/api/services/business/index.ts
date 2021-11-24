@@ -640,6 +640,20 @@ class BusinessService implements IBusinessService {
       throw e;
     }
   }
+
+  public async findBusinessUserByRole(
+    platformSlug: PlatformInterface['slug'],
+    businessId: BusinessUserRoleInterface['businessId'],
+    roleSlug: string
+  ): Promise<Array<BusinessUserRoleInterface>> {
+    const platform = await platformService.findPlatform(platformSlug);
+    const business = await this.findBusiness(platform.id, businessId);
+    const role = await roleService.findRoleByName(business.id, roleSlug);
+    const users = await BusinessUserRole.findAll({
+      where: { businessId: business.id, roleId: role.id, status: 'active' },
+    });
+    return users;
+  }
 }
 
 const businessService = new BusinessService();

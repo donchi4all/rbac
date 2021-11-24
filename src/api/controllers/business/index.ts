@@ -275,4 +275,30 @@ export class BusinessController extends Controller {
       throw err;
     }
   }
+
+  /**
+   * List business user in active business
+   */
+  @Get('business/{businessId}/role/{role}/users')
+  @SuccessResponse(httpStatuses.success.code, httpStatuses.success.message)
+  public async findBusinessUserByRole(
+    platformSlug: PlatformInterface['slug'],
+    businessId: BusinessUserRoleInterface['businessId'],
+    role: string
+  ): Promise<Array<BusinessUserRoleInterface>> {
+    try {
+      return await businessService.findBusinessUserByRole(
+        platformSlug,
+        businessId,
+        role
+      );
+    } catch (err) {
+      this.log.error(
+        `Route business/${businessId}/role/${role}/usersGet with err: ${JSON.stringify(
+          err
+        )}`
+      );
+      throw err;
+    }
+  }
 }
