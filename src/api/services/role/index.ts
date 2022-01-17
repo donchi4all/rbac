@@ -59,15 +59,17 @@ class RoleService implements IRoleService {
           new BusinessErrorHandler(BusinessErrorHandler.DoesNotExist)
         );
       }
-
       const role = Promise.all(
         payload.map(async (payload) => {
           const [title, slug] = Array(2).fill(payload.title);
-          return await Role.create({
-            ...payload,
-            businessId: business.id,
-            title,
-            slug,
+          return await Role.findOrCreate({
+            where: { businessId: business.id , slug , title},
+            defaults: {
+              ...payload,
+              slug,
+              title,
+              businessId: business.id,
+            },
           });
         })
       );
